@@ -12,18 +12,19 @@
 			<h2 class="col-12">Admin</h2>
 		</div>
 	</div>
-	<div class="container text-center">
+	<div class="container">
 		<div class="row">
 
 			<div class="col-12 col-md-6 col-xl-4 element-container">
 				<div class="element">
 					<h3>Users</h3>
 					<hr>
-					{% for user in users.users %}
-						<div class="obj-row">
-							{{ user.name }}<a href="/admin/user/delete?user={{ user.user_id }}" onclick="return confirm_delete_user(this);">&#x274C;</a>
-						</div>
-					{% endfor %}
+					<div class="row">
+						{% for user in users.users %}
+							<a class="col-2" href="/admin/user/delete?user={{ user.user_id }}" onclick="return confirm_delete_user(this);">&#x274C;</a>
+							<h5 class="col-10 line-middle">{{ user.name }}</h5>
+						{% endfor %}
+					</div>
 				</div>
 			</div>
 
@@ -31,22 +32,22 @@
 				<div class="element">
 					<h3>Teams</h3>
 					<hr>
-					{% for team in teams.teams %}
-						<div class="obj-row">
-							<h5>
+					<div class="row">
+						{% for team in teams.teams %}
+							<h5 class="col-2 line-left">
 								{% if team.medal == 1 %}&#x1F947;
 								{% elif team.medal == 2 %}&#x1F948;
 								{% elif team.medal == 3 %}&#x1F949;
 								{% else %}&#x1F44D;{% endif %}
 							</h5>
-							<h5>
+							<h5 class="col-6 line-middle">
 								{{ team.name }}
 							</h5>
-							<h5>
+							<h5 class="col-4 line-right">
 								{{ team.points }}&#x1F3C6;
 							</h5>
-						</div>
-					{% endfor %}
+						{% endfor %}
+					</div>
 				</div>
 			</div>
 
@@ -54,15 +55,15 @@
 				<div class="element">
 					<h3>Objectives</h3>
 					<hr>
-					{% for obj in objectives.objectives %}
-						<div class="obj-row">
-							<h5>&#x1F3C6;{{ obj.points }}</h5>
-							<h6>{{ obj.description }}</h6>
-							<a href="objectives/delete?obj_id={{ obj.obj_id }}" onclick="return confirm_delete_obj(this);">&#x274C;</a>
-						</div>
-					{% endfor %}
+					<div class="row">
+						{% for obj in objectives.objectives %}
+							<a class="col-2 line-left" href="objectives/delete?obj_id={{ obj.obj_id }}" onclick="return confirm_delete_obj(this);">&#x274C;</a>
+							<h5 class="col-7 line-middle">{{ obj.description }}</h5>
+							<h5 class="col-3 line-right">{{ obj.points }}&#x1F3C6;</h5>
+						{% endfor %}
+					</div>
 					<form class="obj-row" action="objectives/new">
-							<input type="number" name="points" size="3" placeholder="points" style="width: 15%">
+							<input type="number" name="points" size="3" placeholder="Points" style="width: 25%">
 							<input type="text" name="descr" placeholder="Description" style="width: 60%">
 							<button type="submit">&#x2705;</button>
 					</form>
@@ -73,15 +74,17 @@
 				<div class="element">
 					<h3>QR Codes</h3>
 					<hr>
-					{% for qrcode in qrcodes %}
-						<div class="obj-row">
-							<h5>&#x1F3C6;{{ qrcode.points }}</h5>
-							<a href="/admin/qrcodes/{{ qrcode.key }}">{{ qrcode.description }}</a>
-							<a href="" onclick="return confirm_delete_obj(this);">&#x274C;</a>
-						</div>
-					{% endfor %}
+					<div class="row">
+						{% for qrcode in qrcodes %}
+								<a class="col-2 line-left" href="" onclick="return confirm_delete_obj(this);">&#x274C;</a>
+								<h5 class="col-7 line-middle">
+									<a href="/admin/qrcodes/{{ qrcode.key }}">{{ qrcode.description }}</a>
+								</h5>
+								<h5 class="col-3 line-right">{{ qrcode.points }}&#x1F3C6;</h5>
+						{% endfor %}
+					</div>
 					<form class="obj-row" action="/admin/qrcodes/new">
-							<input type="number" name="points" size="3" placeholder="points" style="width: 15%">
+							<input type="number" name="points" size="3" placeholder="Points" style="width: 25%">
 							<input type="text" name="descr" placeholder="Description" style="width: 60%">
 							<button type="submit">&#x2705;</button>
 					</form>
@@ -115,11 +118,12 @@
 	{% include 'footers.html' %}
 	<script type="text/javascript">
 		function confirm_delete_user(t) {
-			return confirm(`Are you sure you want to delete user ${t.previousSibling.textContent.trim()}?`);
+			console.log(t);
+			return confirm(`Delete user ${t.previousElementSibling.textContent.trim()}?`);
 		}
 
 		function confirm_delete_obj(t) {
-			return confirm(`Are you sure you want to delete the objective ${t.previousElementSibling.textContent.trim()}?`);
+			return confirm(`Delete objective ${t.nextElementSibling.textContent.trim()}?`);
 		}
 
 		function confirm_delete_pic(t) {

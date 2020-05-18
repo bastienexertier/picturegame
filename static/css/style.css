@@ -42,7 +42,6 @@ img {
 .element-container {
 	padding-left: 15px;
 	padding-right: 15px;
-	margin-bottom: 30px;
 }
 
 .obj-list {
@@ -66,6 +65,19 @@ img {
 
 .obj-points {
 	flex-shrink: 0;
+}
+
+
+.line-left {
+	word-break: keep-all;
+	text-align: center;
+}
+.line-middle {
+	padding: 0px;
+}
+.line-right {
+	text-align: right;
+	word-break: keep-all;
 }
 
 .name-form > .row > * {
@@ -104,4 +116,28 @@ img {
 .rnd-side-content {
 	height: 100%;
 	padding-top: 15%;
+}
+
+input {
+	color: white;
+	background-color: #192a56;
+	border-color: #192a56;
+	padding: 3px 7px;
+}
+
+/* no arrow sur l'input nombre */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+button {
+  border: none;
+  background-color: inherit;
+  cursor: pointer;
+  padding: 0px;
 }
