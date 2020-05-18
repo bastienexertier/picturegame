@@ -11,6 +11,7 @@ from objects.user import UserVue, UserModelName, UsersModel, RemoveUser, Teammat
 from objects.team import TeamsModel, TeamOf, TeamVue, TeamLeave, TeamModelFromId, NoTeamError
 from objects.objective import ObjectivesModel, ObjectiveVue, DeleteObjectiveVue, ObjectiveModelFromId
 from objects.picture import PictureOfTeam, PictureVue, PicturesOfTeamModel, DeletePictureVue, AllPicturesModel
+from objects.qrcode import QRCodeVue, QRCodesModel
 
 app = Flask(__name__)
 app.secret_key = 'turbo prout prout'
@@ -173,7 +174,19 @@ def admin():
 		objs = ObjectivesModel(cursor)
 		teams = TeamsModel(cursor)
 		users = UsersModel(cursor)
-	return render_template('admin.html', objectives=objs.objectives, teams=teams.teams, users=users.users)
+		qrcodes = QRCodesModel(cursor)
+	return render_template('admin.html', objectives=objs.objectives,\
+		teams=teams.teams, users=users.users, qrcodes=qrcodes.qrcodes)
+
+@app.route('/admin/qrcodes/new')
+@basic_auth.required
+def add_qrcode():
+	""" ajoute un nouveau qr code """
+	points = request.args['points']
+	descr = request.args['descr']
+	with Cursor() as cursor:
+		QRCodeVue(points, descr).send_db(cursor)
+	return redirect('/admin')
 
 if __name__ == '__main__':
 	app.run('0.0.0.0')

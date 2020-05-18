@@ -66,6 +66,25 @@
 					{% endfor %}
 				</div>
 			</div>
+
+			<div class="col-12 col-md-6 col-xl-4 element-container">
+				<div class="element">
+					<h3>QR Codes</h3>
+					<hr>
+					{% for qrcode in qrcodes %}
+						<div class="obj-row">
+							<h5>&#x1F3C6;{{ qrcode.points }}</h5>
+							<h6>{{ qrcode.description }}</h6>
+							<a href="" onclick="return confirm_delete_obj(this);">&#x274C;</a>
+						</div>
+					{% endfor %}
+					<form class="obj-row" action="/admin/qrcodes/new">
+							<input type="number" name="points" size="3" placeholder="points" style="width: 15%">
+							<input type="text" name="descr" placeholder="Description" style="width: 60%">
+							<button type="submit">&#x2705;</button>
+					</form>
+				</div>
+			</div>
 		</div>
 	</div>
 	{% include 'footers.html' %}
@@ -75,7 +94,6 @@
 		}
 
 		function confirm_delete_obj(t) {
-			console.log(t);
 			return confirm(`Are you sure you want to delete the objective ${t.previousElementSibling.textContent.trim()} ?`);
 		}
 	</script>
