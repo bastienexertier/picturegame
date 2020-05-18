@@ -6,7 +6,7 @@ from flask import Flask, render_template, request, redirect, session, send_file
 
 import colors
 from model.dbi import Cursor
-from objects.user import UserVue, UserModel, TeammateVue, TeammateModel, Teammates
+from objects.user import UserVue, UserModelName, UsersModel, RemoveUser, TeammateVue, TeammateModel, Teammates
 from objects.team import TeamsModel, TeamOf, TeamVue, TeamLeave, TeamModelFromId, NoTeamError
 from objects.objective import ObjectivesModel, ObjectiveVue, DeleteObjectiveVue, ObjectiveModelFromId
 from objects.picture import PictureOfTeam, PictureVue, PicturesOfTeamModel, DeletePictureVue, AllPicturesModel
@@ -30,6 +30,14 @@ def new_user():
 			return redirect('/')
 		session['user'] = max(cursor.cursor.lastrowid, 1)
 	return redirect('/team/list?select=1')
+
+@app.route('/deleteuser')
+def delete_user():
+	""" supprime l'utilisateur specifie """
+	user_id = request.args['user']
+	with Cursor() as cursor:
+		RemoveUser(user_id).send_db(cursor)
+	return redirect('/admin')
 
 @app.route('/team')
 def my_team():
@@ -70,11 +78,11 @@ def user_page():
 		return redirect('/')
 	user_id = session['user']
 	with Cursor() as cursor:
-		user = UserModel(cursor, user_id)
+		user = UserModelName(cursor, user_id)
 		teammate = TeammateModel(cursor, user_id)
-		teams = TeamsModel(cursor).teams
+		teams = TeamsModel(cursor)
 		select = int(request.args['select'])
-		return render_template('team_list.html', select=select, user=user, teams=teams, teammate=teammate)
+		return render_template('team_list.html', select=select, user=user, teams=teams.teams, teammate=teammate)
 
 @app.route('/team/join')
 def team_join():
@@ -137,14 +145,14 @@ def new_obj():
 	descr = request.args['descr']
 	with Cursor() as cursor:
 		ObjectiveVue(points, descr).send_db(cursor)
-	return redirect('/objectives/list')
+	return redirect('/admin')
 
 @app.route('/objectives/delete')
 def delete_obj():
 	obj_id = request.args['obj_id']
 	with Cursor() as cursor:
 		DeleteObjectiveVue(obj_id).send_db(cursor)
-	return redirect('/objectives/list')
+	return redirect('/admin')
 
 @app.route('/picture/<pic_id>')
 def send_picture(pic_id):
@@ -164,7 +172,9 @@ def admin():
 	""" sert la page d'administration """
 	with Cursor() as cursor:
 		objs = ObjectivesModel(cursor)
-	return render_template('objectives_list.html', objectives=objs.objectives)
+		teams = TeamsModel(cursor)
+		users = UsersModel(cursor)
+	return render_template('admin.html', objectives=objs.objectives, teams=teams.teams, users=users.users)
 
 if __name__ == '__main__':
 	app.run('0.0.0.0')

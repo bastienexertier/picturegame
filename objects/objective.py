@@ -9,7 +9,8 @@ class Objective:
 
 class ObjectiveVue(Objective, Vue):
 	def _check(self, cursor):
-		return True
+		""" verifie que le nombre de point sois correct, et que la descr soit assez longue """
+		return self.points.isdigit() and len(self.description) > 3
 
 	def _send_db(self, cursor):
 		cursor.add(req.new_objective(), (self.points, self.description))

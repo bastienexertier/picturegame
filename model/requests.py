@@ -5,8 +5,14 @@ def user_with_name():
 def new_user():
 	return """ INSERT INTO users(name) VALUES (?) """
 
+def delete_user():
+	return """ DELETE FROM users WHERE user_id = ? """
+
 def user():
 	return """ SELECT * FROM users WHERE user_id = ? """
+
+def users():
+	return """ SELECT * FROM users """
 
 def all_teams():
 	return """ SELECT * FROM teams """

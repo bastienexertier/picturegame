@@ -15,16 +15,42 @@ class UserVue(User, Vue):
 		cursor.add(req.new_user(), (self.name,))
 
 class UserModel(User, Model):
+	""" squelette d'un user model """
+	def __init__(self, user_id, name):
+		super().__init__(name)
+		self.user_id = user_id
+
+class UserModelName(UserModel):
+	""" un user ou on charge le nom depuis la db """
 	def __init__(self, cursor, user_id):
 		self.cursor = cursor
-		self.user_id = user_id
-		super().__init__(self.__get_name())
+		super().__init__(user_id, self.__get_name(user_id))
 
 	def json(self):
 		return self.name
 
-	def __get_name(self):
-		return self.cursor.get_one(req.user(), (self.user_id,))['name']
+	def __get_name(self, user_id):
+		return self.cursor.get_one(req.user(), (user_id,))['name']
+
+class RemoveUser(Vue):
+	""" supprime un user de la db en fct de son id """
+	def __init__(self, user_id):
+		self.user_id = user_id
+
+	def _check(self, cursor):
+		return bool(cursor.get_one(req.user(), (self.user_id,)))
+
+	def _send_db(self, cursor):
+		cursor.add(req.delete_user(), (self.user_id,))
+
+class UsersModel(Model):
+	""" une classe contenant la liste des joueurs """
+	def __init__(self, cursor):
+		self.users = UsersModel.__get_users(cursor)
+
+	@staticmethod
+	def __get_users(cursor):
+		return [UserModel(user['user_id'], user['name']) for user in cursor.get(req.users())]
 
 class Teammate:
 	def __init__(self, user_id, team_id, status):

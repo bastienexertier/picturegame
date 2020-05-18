@@ -31,17 +31,18 @@ img {
 	margin-bottom: 10vh;
 }
 
-.element-container {
-	padding-left: 30px;
-	padding-right: 30px;
-}
-
 .element {
 	background-color: #2c3e5080;
 	border-radius: 10px;
 	padding: 10px;
 	margin-top: 20px;
 	margin-bottom: 0px;
+}
+
+.element-container {
+	padding-left: 30px;
+	padding-right: 30px;
+	margin-bottom: 30px;
 }
 
 .obj-list {
