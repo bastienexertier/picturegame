@@ -1,3 +1,6 @@
 # Specify filepatterns you want git to ignore.
 model/*.db
 model/sqlite3.exe
+__pycache__/*
+*/__pycache__/*
+/uploads/*
