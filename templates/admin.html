@@ -19,13 +19,9 @@
 				<div class="element">
 					<h3>Users</h3>
 					<hr>
-<<<<<<< HEAD
-					{% for obj in objectives.objectives %}
-=======
-					{% for user in users %}
->>>>>>> qrcodes
+					{% for user in users.users %}
 						<div class="obj-row">
-							{{ user.name }}<a href="deleteuser?user={{ user.user_id }}" onclick="return confirm_delete_user(this);">&#x274C;</a>
+							{{ user.name }}<a href="/admin/user/delete?user={{ user.user_id }}" onclick="return confirm_delete_user(this);">&#x274C;</a>
 						</div>
 					{% endfor %}
 				</div>
@@ -58,17 +54,11 @@
 				<div class="element">
 					<h3>Objectives</h3>
 					<hr>
-<<<<<<< HEAD
-					{% for user in users.users %}
-						<div class="obj-row">
-							{{ user.name }}<a href="/admin/user/delete?user={{ user.user_id }}" onclick="return confirm_delete_user(this);">&#x274C;</a>
-=======
-					{% for obj in objectives %}
+					{% for obj in objectives.objectives %}
 						<div class="obj-row">
 							<h5>&#x1F3C6;{{ obj.points }}</h5>
 							<h6>{{ obj.description }}</h6>
 							<a href="objectives/delete?obj_id={{ obj.obj_id }}" onclick="return confirm_delete_obj(this);">&#x274C;</a>
->>>>>>> qrcodes
 						</div>
 					{% endfor %}
 					<form class="obj-row" action="objectives/new">
@@ -129,7 +119,6 @@
 		}
 
 		function confirm_delete_obj(t) {
-<<<<<<< HEAD
 			return confirm(`Are you sure you want to delete the objective ${t.previousElementSibling.textContent.trim()}?`);
 		}
 
@@ -139,9 +128,6 @@
 
 		function confirm_accept_pic(t) {
 			return confirm(`Are you sure you want to accept this picture?`);
-=======
-			return confirm(`Are you sure you want to delete the objective ${t.previousElementSibling.textContent.trim()} ?`);
->>>>>>> qrcodes
 		}
 	</script>
 </body>
