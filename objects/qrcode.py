@@ -2,6 +2,7 @@
 
 from random import choice
 from string import ascii_lowercase
+from os import remove
 from os.path import isfile, join
 from subprocess import check_output
 
@@ -35,6 +36,19 @@ class QRCodeVue(QRCode, Vue):
 		target_url = 'http://192.168.0.5:5000/qrcode/{}'.format(key)
 		create_qrcode(target_url, join('qrcodes', filename))
 		cursor.add(req.new_qr(), (key, self.points, self.description))
+
+class RemoveQRCode(Vue):
+	"""docstring for RemoveQRCode"""
+	def __init__(self, key):
+		self.key = key
+
+	def _check(self, cursor):
+		return True
+
+	def _send_db(self, cursor):
+		qrcode = QRCodeFromKey(cursor, self.key)
+		cursor.add(req.delete_qr(), (self.key,))
+		remove(join('qrcodes', self.key + '.png'))
 
 class QRCodeModel(QRCode, Model):
 	""" un qrcode venant du model """

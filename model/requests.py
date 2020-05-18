@@ -113,6 +113,9 @@ def get_points():
 def new_qr():
 	return """ INSERT INTO qrcodes(key, points, description) VALUES (?, ?, ?) """
 
+def delete_qr():
+	return """ DELETE FROM qrcodes WHERE key = ? """
+
 def all_qrcodes():
 	return """ SELECT * FROM qrcodes """
 

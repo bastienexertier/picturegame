@@ -76,7 +76,7 @@
 					<hr>
 					<div class="row">
 						{% for qrcode in qrcodes %}
-								<a class="col-2 line-left" href="" onclick="return confirm_delete_obj(this);">&#x274C;</a>
+								<a class="col-2 line-left" href="/admin/qrcodes/delete?qr={{ qrcode.key }}" onclick="return confirm_delete_qr(this);">&#x274C;</a>
 								<h5 class="col-7 line-middle">
 									<a href="/admin/qrcodes/{{ qrcode.key }}">{{ qrcode.description }}</a>
 								</h5>
@@ -126,12 +126,16 @@
 			return confirm(`Delete objective ${t.nextElementSibling.textContent.trim()}?`);
 		}
 
+		function confirm_delete_qr(t) {
+			return confirm(`Delete QR code ${t.nextElementSibling.textContent.trim()}?`);
+		}
+
 		function confirm_delete_pic(t) {
-			return confirm(`Are you sure you want to delete this picture?`);
+			return confirm(`Delete this picture?`);
 		}
 
 		function confirm_accept_pic(t) {
-			return confirm(`Are you sure you want to accept this picture?`);
+			return confirm(`Accept this picture?`);
 		}
 	</script>
 </body>

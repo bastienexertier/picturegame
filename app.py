@@ -11,7 +11,7 @@ from objects.user import UserVue, UserModelName, UsersModel, RemoveUser, Teammat
 from objects.team import TeamsModel, TeamOf, TeamVue, TeamLeave, TeamModelFromId, NoTeamError
 from objects.objective import ObjectivesModel, ObjectiveVue, DeleteObjectiveVue, ObjectiveModelFromId
 from objects.picture import PictureOfTeam, PictureVue, PicturesOfTeamModel, DeletePictureVue, AcceptPictureVue, AllPicturesModel, PicturesWithStatus
-from objects.qrcode import QRCodeVue, QRCodesModel, QRCodeFromKey, QRDoesntExistError, FoundQRCodeVue
+from objects.qrcode import QRCodeVue, QRCodesModel, QRCodeFromKey, QRDoesntExistError, FoundQRCodeVue, RemoveQRCode
 
 app = Flask(__name__)
 app.secret_key = 'turbo prout prout'
@@ -220,6 +220,15 @@ def add_qrcode():
 	descr = request.args['descr']
 	with Cursor() as cursor:
 		QRCodeVue(points, descr).send_db(cursor)
+	return redirect('/admin')
+
+@app.route('/admin/qrcodes/delete')
+@basic_auth.required
+def delete_qrcode():
+	""" supprime le qrcode """
+	qr_id = request.args['qr']
+	with Cursor() as cursor:
+		RemoveQRCode(qr_id).send_db(cursor)
 	return redirect('/admin')
 
 @app.route('/admin/qrcodes/<qr_key>')
