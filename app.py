@@ -166,6 +166,11 @@ def random_picture():
 		team = TeamModelFromId(cursor, pic.team_id)
 		return render_template('random_picture.html', team=team, pic=pic, obj=obj)
 
+@app.route('/qrcodes/<qr_key>')
+def qrcode(qr_key):
+	""" page quand quelqu'un trouve un qrcode """
+	return "bravo tu as trouve le qrcode {}".format(qr_key)
+
 @app.route('/admin')
 @basic_auth.required
 def admin():
@@ -187,6 +192,12 @@ def add_qrcode():
 	with Cursor() as cursor:
 		QRCodeVue(points, descr).send_db(cursor)
 	return redirect('/admin')
+
+@app.route('/admin/qrcodes/<qr_key>')
+@basic_auth.required
+def admin_qrcode_img(qr_key):
+	""" retourne le png du qrcode demande """
+	return send_file(join('qrcodes', qr_key + '.png'))
 
 if __name__ == '__main__':
 	app.run('0.0.0.0')

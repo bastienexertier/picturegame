@@ -15,20 +15,13 @@
 
 			<div class="col-12 col-md-6 col-xl-4 element-container">
 				<div class="element">
-					<h3>Objectives</h3>
+					<h3>Users</h3>
 					<hr>
-					{% for obj in objectives %}
+					{% for user in users %}
 						<div class="obj-row">
-							<h5>&#x1F3C6;{{ obj.points }}</h5>
-							<h6>{{ obj.description }}</h6>
-							<a href="objectives/delete?obj_id={{ obj.obj_id }}" onclick="return confirm_delete_obj(this);">&#x274C;</a>
+							{{ user.name }}<a href="deleteuser?user={{ user.user_id }}" onclick="return confirm_delete_user(this);">&#x274C;</a>
 						</div>
 					{% endfor %}
-					<form class="obj-row" action="objectives/new">
-							<input type="number" name="points" size="3" placeholder="points" style="width: 15%">
-							<input type="text" name="descr" placeholder="Description" style="width: 60%">
-							<button type="submit">&#x2705;</button>
-					</form>
 				</div>
 			</div>
 
@@ -57,13 +50,20 @@
 
 			<div class="col-12 col-md-6 col-xl-4 element-container">
 				<div class="element">
-					<h3>Users</h3>
+					<h3>Objectives</h3>
 					<hr>
-					{% for user in users %}
+					{% for obj in objectives %}
 						<div class="obj-row">
-							{{ user.name }}<a href="deleteuser?user={{ user.user_id }}" onclick="return confirm_delete_user(this);">&#x274C;</a>
+							<h5>&#x1F3C6;{{ obj.points }}</h5>
+							<h6>{{ obj.description }}</h6>
+							<a href="objectives/delete?obj_id={{ obj.obj_id }}" onclick="return confirm_delete_obj(this);">&#x274C;</a>
 						</div>
 					{% endfor %}
+					<form class="obj-row" action="objectives/new">
+							<input type="number" name="points" size="3" placeholder="points" style="width: 15%">
+							<input type="text" name="descr" placeholder="Description" style="width: 60%">
+							<button type="submit">&#x2705;</button>
+					</form>
 				</div>
 			</div>
 
@@ -74,7 +74,7 @@
 					{% for qrcode in qrcodes %}
 						<div class="obj-row">
 							<h5>&#x1F3C6;{{ qrcode.points }}</h5>
-							<h6>{{ qrcode.description }}</h6>
+							<a href="/admin/qrcodes/{{ qrcode.key }}">{{ qrcode.description }}</a>
 							<a href="" onclick="return confirm_delete_obj(this);">&#x274C;</a>
 						</div>
 					{% endfor %}

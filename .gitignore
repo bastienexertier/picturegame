@@ -4,3 +4,4 @@ model/sqlite3.exe
 __pycache__/*
 */__pycache__/*
 /uploads/*
+/qrcodes/*
