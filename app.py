@@ -3,6 +3,7 @@
 from os.path import join
 from json import dumps
 from flask import Flask, render_template, request, redirect, session, send_file
+from flask_basicauth import BasicAuth
 
 import colors
 from model.dbi import Cursor
@@ -13,6 +14,9 @@ from objects.picture import PictureOfTeam, PictureVue, PicturesOfTeamModel, Dele
 
 app = Flask(__name__)
 app.secret_key = 'turbo prout prout'
+app.config['BASIC_AUTH_USERNAME'] = 'admin'
+app.config['BASIC_AUTH_PASSWORD'] = 'suce_mak'
+basic_auth = BasicAuth(app)
 
 @app.route('/')
 def main_page():
@@ -162,6 +166,7 @@ def random_picture():
 		return render_template('random_picture.html', team=team, pic=pic, obj=obj)
 
 @app.route('/admin')
+@basic_auth.required
 def admin():
 	""" sert la page d'administration """
 	with Cursor() as cursor:
