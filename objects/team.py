@@ -64,8 +64,10 @@ class TeamOf(TeamModelFromId):
 	""" represente l'equipe d'un user """
 	def __init__(self, cursor, user_id):
 		self.user_id = user_id
-		team_id = cursor.get_one(req.team_of_user(), (user_id,))['team_id']
-		super().__init__(cursor, team_id)
+		team = cursor.get_one(req.team_of_user(), (user_id,))
+		if not team:
+			raise NoTeamError()
+		super().__init__(cursor, team['team_id'])
 
 class TeamVue(Team, Vue):
 	""" une equipe venant de la vue, envoie dans la bd apres verif """

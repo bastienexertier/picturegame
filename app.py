@@ -6,9 +6,10 @@ from flask import Flask, render_template, request, redirect, session, send_file
 from flask_basicauth import BasicAuth
 
 import colors
+import getters
 from model.dbi import Cursor
 from objects.user import UserVue, UserModelName, UsersModel, RemoveUser, UsersFromTeam
-from objects.teammate import TeammateVue, TeammateModel
+from objects.teammate import TeammateVue
 from objects.team import TeamsModel, TeamOf, TeamVue, TeamLeave, TeamModelFromId, NoTeamError
 from objects.objective import ObjectivesModel, ObjectiveVue, DeleteObjectiveVue, ObjectiveModelFromId
 from objects.picture import PictureOfTeam, PictureVue, PicturesOfTeamModel, DeletePictureVue, AcceptPictureVue, AllPicturesModel, PicturesWithStatus
@@ -41,7 +42,7 @@ def new_user():
 def my_team():
 	if 'user' not in session:
 		return redirect('/')
-	user_id = session['user']
+	user_id = getters.user(session)
 	with Cursor() as cursor:
 		teammate = TeamOf(cursor, user_id)
 		team_id = int(request.args['team'] if 'team' in request.args else teammate.team_id)
@@ -64,7 +65,7 @@ def new_team_go():
 	if 'teamname' not in request.args:
 		return redirect('/team/new')
 	team_name = request.args['teamname']
-	user_id = session['user']
+	user_id = getters.user(session)
 	color = int(request.args['color'])
 	with Cursor() as cursor:
 		TeamVue(user_id, team_name, color).send_db(cursor)
@@ -74,10 +75,13 @@ def new_team_go():
 def user_page():
 	if 'user' not in session:
 		return redirect('/')
-	user_id = session['user']
+	user_id = getters.user(session)
 	with Cursor() as cursor:
 		user = UserModelName(cursor, user_id)
-		team_id = TeamOf(cursor, user_id).team_id
+		try:
+			team_id = TeamOf(cursor, user_id).team_id
+		except NoTeamError:
+			team_id = -1
 		teams = TeamsModel(cursor)
 		select = int(request.args['select'])
 		return render_template('team_list.html', select=select, user=user, teams=teams.teams, team_id=team_id)
@@ -86,7 +90,7 @@ def user_page():
 def team_join():
 	if 'team' not in request.args:
 		return redirect('/team/select')
-	user_id = session['user']
+	user_id = getters.user(session)
 	team_id = int(request.args['team'])
 	with Cursor() as cursor:
 		TeammateVue(user_id, team_id, 0).send_db(cursor)
@@ -94,7 +98,7 @@ def team_join():
 
 @app.route('/team/leave')
 def team_leave():
-	user_id = session['user']
+	user_id = getters.user(session)
 	with Cursor() as cursor:
 		TeamLeave(user_id).send_db(cursor)
 	return redirect('/team/list?select=1')
@@ -114,7 +118,7 @@ def add_picture():
 		file = request.files['file']
 		if file.filename:
 			with Cursor() as cursor:
-				user_id = session['user']
+				user_id = getters.user(session)
 				team_id = TeamOf(cursor, user_id).team_id
 				obj_id = request.form['obj_id']
 				pic = PictureVue(team_id, obj_id)
@@ -124,7 +128,7 @@ def add_picture():
 
 @app.route('/team/picture/delete')
 def delete_picture():
-	user_id = session['user']
+	user_id = getters.user(session)
 	obj_id = request.args['obj_id']
 	with Cursor() as cursor:
 		team_id = TeamOf(cursor, user_id).team_id
@@ -163,7 +167,7 @@ def random_picture():
 def found_qrcode(qr_key):
 	""" page quand quelqu'un trouve un qrcode """
 	with Cursor() as cursor:
-		user_id = session['user']
+		user_id = getters.user(session)
 		team = TeamOf(cursor, user_id)
 		try:
 			qrcode = QRCodeFromKey(cursor, qr_key)
@@ -237,6 +241,16 @@ def delete_qrcode():
 def admin_qrcode_img(qr_key):
 	""" retourne le png du qrcode demande """
 	return send_file(join('qrcodes', qr_key + '.png'))
+
+@app.errorhandler(getters.NoUserError)
+def handle_no_user_error(_):
+	""" redirige le client vers la creation d'user si user nest pas defini """
+	return redirect('/')
+
+@app.errorhandler(NoTeamError)
+def handle_no_team_error(_):
+	""" redirige le client vers la selection d'equipe si une erreur survient """
+	return redirect('/team/list?select=1')
 
 if __name__ == '__main__':
 	app.run('0.0.0.0')
