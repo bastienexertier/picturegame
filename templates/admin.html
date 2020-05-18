@@ -2,7 +2,7 @@
 <html>
 <head>
 	{% include 'headers.html' %}
-	<title>Objectives</title>
+	<title>Admin</title>
 </head>
 <body>
 	<div class="jumbotron">
@@ -13,51 +13,58 @@
 	<div class="container text-center">
 		<div class="row">
 
-			<h3 class="col-12">Objectives</h3>
-			<div class="col-12 col-md-6 col-xl-4 element element-container">
-				{% for obj in objectives %}
-					<div class="obj-row">
-						<h5>&#x1F3C6;{{ obj.points }}</h5>
-						<h6>{{ obj.description }}</h6>
-						<a href="objectives/delete?obj_id={{ obj.obj_id }}" onclick="return confirm_delete_obj(this);">&#x274C;</a>
-					</div>
-				{% endfor %}
-				<form class="obj-row" action="objectives/new">
-						<input type="number" name="points" size="3" placeholder="points">
-						<input type="text" name="descr" placeholder="Description">
-						<button type="submit">&#x2705;</button>
-				</form>
+			<div class="col-12 col-md-6 col-xl-4 element-container">
+				<div class="element">
+					<h3>Objectives</h3>
+					<hr>
+					{% for obj in objectives %}
+						<div class="obj-row">
+							<h5>&#x1F3C6;{{ obj.points }}</h5>
+							<h6>{{ obj.description }}</h6>
+							<a href="objectives/delete?obj_id={{ obj.obj_id }}" onclick="return confirm_delete_obj(this);">&#x274C;</a>
+						</div>
+					{% endfor %}
+					<form class="obj-row" action="objectives/new">
+							<input type="number" name="points" size="3" placeholder="points" style="width: 15%">
+							<input type="text" name="descr" placeholder="Description" style="width: 60%">
+							<button type="submit">&#x2705;</button>
+					</form>
+				</div>
 			</div>
 
-
-			<h3 class="col-12">Teams</h3>
-			<div class="col-12 col-md-6 col-xl-4 element element-container">
-				{% for team in teams %}
-					<div class="obj-row">
-						<h5>
-							{% if team.medal == 1 %}&#x1F947;
-							{% elif team.medal == 2 %}&#x1F948;
-							{% elif team.medal == 3 %}&#x1F949;
-							{% else %}&#x1F44D;{% endif %}
-						</h5>
-						<h5>
-							{{ team.name }}
-						</h5>
-						<h5>
-							{{ team.points }}&#x1F3C6;
-						</h5>
-					</div>
-				{% endfor %}
+			<div class="col-12 col-md-6 col-xl-4 element-container">
+				<div class="element">
+					<h3>Teams</h3>
+					<hr>
+					{% for team in teams %}
+						<div class="obj-row">
+							<h5>
+								{% if team.medal == 1 %}&#x1F947;
+								{% elif team.medal == 2 %}&#x1F948;
+								{% elif team.medal == 3 %}&#x1F949;
+								{% else %}&#x1F44D;{% endif %}
+							</h5>
+							<h5>
+								{{ team.name }}
+							</h5>
+							<h5>
+								{{ team.points }}&#x1F3C6;
+							</h5>
+						</div>
+					{% endfor %}
+				</div>
 			</div>
 
-
-			<h3 class="col-12">Users</h3>
-			<div class="col-12 col-md-6 col-xl-4 element element-container">
-				{% for user in users %}
-					<div class="obj-row">
-						{{ user.name }}<a href="deleteuser?user={{ user.user_id }}" onclick="return confirm_delete_user(this);">&#x274C;</a>
-					</div>
-				{% endfor %}
+			<div class="col-12 col-md-6 col-xl-4 element-container">
+				<div class="element">
+					<h3>Users</h3>
+					<hr>
+					{% for user in users %}
+						<div class="obj-row">
+							{{ user.name }}<a href="deleteuser?user={{ user.user_id }}" onclick="return confirm_delete_user(this);">&#x274C;</a>
+						</div>
+					{% endfor %}
+				</div>
 			</div>
 		</div>
 	</div>
