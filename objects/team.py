@@ -1,4 +1,6 @@
 
+from itertools import chain
+
 from objects.jsonable import Vue, Model
 from objects.teammate import TeammateVue
 import model.requests as req
@@ -73,37 +75,35 @@ class TeamVue(Team, Vue):
 		team_id = cursor.add(req.new_team(), (self.name, self.color.color_id))
 		TeammateVue(self.user_id, team_id, 5).send_db(cursor)
 
-class RemoveTeamIfEmpty(Vue):
-	def __init__(self, team_id):
-		self.team_id = team_id
-
-	def _check(self, cursor):
-		return not cursor.get(req.users_of_team(), (self.team_id,))
-
-	def _send_db(self, cursor):
-		cursor.add(req.delete_team(), (self.team_id,))
-
 class TeamsModel(Model):
+	""" une list de team venant du model, calcul les points et les medailles """
 	def __init__(self, cursor):
-		self.cursor = cursor
-		self.teams = self.__load_teams()
+		self.teams = TeamsModel.__load_teams(cursor)
 		self.teams = self.__load_medals()
 
-	def __load_teams(self):
+	@staticmethod
+	def __load_points(cursor):
+		objs_pts = cursor.get(req.get_points_from_objs())
+		qrs_pts = cursor.get(req.get_points_from_qrs())
+
+		res = {}
+		for pts in chain(objs_pts, qrs_pts):
+			team_id = pts['team_id']
+			if team_id not in res:
+				res[team_id] = 0
+			res[team_id] += pts['points']
+
+		return res
+
+	@staticmethod
+	def __load_teams(cursor):
 		res = []
-		points_from_objs = {}
-		for score in self.cursor.get(req.get_points_from_objs(), ()):
-			points_from_objs[score['team_id']] = score['points']
+		points = TeamsModel.__load_points(cursor)
 
-		points_from_qrs = {}
-		for score in self.cursor.get(req.get_points_from_qrs(), ()):
-			points_from_qrs[score['team_id']] = score['points']
-
-		for team in self.cursor.get(req.all_teams()):
+		for team in cursor.get(req.all_teams()):
 			team_id = team['team_id']
-			score = points_from_objs.pop(team_id, 0) + points_from_qrs.pop(team_id, 0)
-			team = TeamMedalModel(self.cursor, team_id, team['name'], team['color'], score)
-			res.append(team)
+			score = points.pop(team_id, 0)
+			res.append(TeamMedalModel(cursor, team_id, team['name'], team['color'], score))
 		return res
 
 	def __load_medals(self):
@@ -124,9 +124,11 @@ class TeamsModel(Model):
 		return res
 
 	def to_dict(self):
+		""" retourne la liste de team sous forme de dict(team_id) = team """
 		return {team.team_id: team for team in self.teams}
 
 class TeamLeave(Vue):
+	""" represente un user qui quitte son equipe, l'equipe est detruite si vide """
 	def __init__(self, user_id):
 		self.user_id = user_id
 
@@ -137,3 +139,15 @@ class TeamLeave(Vue):
 		team_id = cursor.get_one(req.team_of_user(), (self.user_id,))['team_id']
 		cursor.add(req.leave_team(), (self.user_id,))
 		RemoveTeamIfEmpty(team_id).send_db(cursor)
+
+class RemoveTeamIfEmpty(Vue):
+	""" suppression de l'equipe si elle est vide """
+	def __init__(self, team_id):
+		self.team_id = team_id
+
+	def _check(self, cursor):
+		""" verifie que l'equipe soit bien vide """
+		return not cursor.get(req.users_of_team(), (self.team_id,))
+
+	def _send_db(self, cursor):
+		cursor.add(req.delete_team(), (self.team_id,))
