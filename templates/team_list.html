@@ -40,13 +40,13 @@
 								{% else %}&#x1F44D;{% endif %}
 							</h4>
 							<h5 class="col-6">
-								{% if teammate.team_id and teammate.team_id == t.team_id %}&#x1F970;{% endif %}
+								{% if team_id and team_id == t.team_id %}&#x1F970;{% endif %}
 								{% if select %}
 								<a href="join?team={{ t.team_id }}">Join</a>
 								{% else %}
 								<a href="/team?team={{ t.team_id }}">Check</a>
 								{% endif %}
-								{% if teammate.team_id and teammate.team_id == t.team_id %}&#x1F970;{% endif %}
+								{% if team_id and team_id == t.team_id %}&#x1F970;{% endif %}
 							</h5>
 							<h4 class="col-3">
 								{{ t.points }}&#x1F3C6;

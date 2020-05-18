@@ -83,6 +83,7 @@ def get_pictures_w_status():
 def get_team_points_from_objs():
 	return """ 
 		SELECT
+			t.team_id,
 			SUM(o.points) as points
 		FROM
 			objectives as o,
@@ -92,11 +93,14 @@ def get_team_points_from_objs():
 			p.team_id = t.team_id
 			AND p.objective_id = o.objective_id
 			AND t.team_id = ?
+		GROUP BY
+			t.team_id
 		"""
 
 def get_team_points_from_qrs():
 	return """ 
 		SELECT
+			t.team_id,
 			SUM(qr.points) as points
 		FROM
 			qrcodes as qr,
@@ -106,6 +110,8 @@ def get_team_points_from_qrs():
 			has_qr.team_id = t.team_id
 			AND has_qr.qr_id = qr.qr_id
 			AND t.team_id = ?
+		GROUP BY
+			t.team_id
 		"""
 
 def get_points_from_objs():

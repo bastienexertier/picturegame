@@ -43,7 +43,7 @@ def my_team():
 		return redirect('/')
 	user_id = session['user']
 	with Cursor() as cursor:
-		teammate = TeammateModel(cursor, user_id)
+		teammate = TeamOf(cursor, user_id)
 		team_id = int(request.args['team'] if 'team' in request.args else teammate.team_id)
 		try:
 			team = TeamModelFromId(cursor, team_id)
@@ -77,10 +77,10 @@ def user_page():
 	user_id = session['user']
 	with Cursor() as cursor:
 		user = UserModelName(cursor, user_id)
-		teammate = TeammateModel(cursor, user_id)
+		team_id = TeamOf(cursor, user_id).team_id
 		teams = TeamsModel(cursor)
 		select = int(request.args['select'])
-		return render_template('team_list.html', select=select, user=user, teams=teams.teams, teammate=teammate)
+		return render_template('team_list.html', select=select, user=user, teams=teams.teams, team_id=team_id)
 
 @app.route('/team/join')
 def team_join():

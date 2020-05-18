@@ -14,9 +14,7 @@ class Teammate:
 		return temp.format(self.user_id, self.team_id, self.status)
 
 class TeammateVue(Teammate, Vue):
-	def __init__(self, user_id, team_id, status):
-		super().__init__(user_id, team_id, status)
-
+	""" un user a choisi une equipe """
 	def _check(self, cursor):
 		return True
 

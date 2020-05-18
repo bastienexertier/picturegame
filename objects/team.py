@@ -28,7 +28,13 @@ class TeamModel(Team, Model):
 	def _load_points(cursor, team_id):
 		objs_points = cursor.get_one(req.get_team_points_from_objs(), (team_id,))
 		qrs_points = cursor.get_one(req.get_team_points_from_qrs(), (team_id,))
-		return objs_points.pop('points', 0) + qrs_points.pop('points', 0)
+
+		total = 0
+		if objs_points:
+			total += objs_points.pop('points', 0)
+		if qrs_points:
+			total += qrs_points.pop('points', 0)
+		return total
 
 class TeamModelFromId(TeamModel):
 	""" une equipe a partir d'une id de team """
