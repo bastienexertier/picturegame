@@ -109,3 +109,18 @@ def get_points():
 		GROUP BY
 			t.team_id
 	"""
+
+def new_qr():
+	return """ INSERT INTO qrcodes(key, points, description) VALUES (?, ?, ?) """
+
+def all_qrcodes():
+	return """ SELECT * FROM qrcodes """
+
+def qr_from_key():
+	return """ SELECT * FROM qrcodes WHERE key = ? """
+
+def has_found_qr():
+	return """ SELECT * FROM team_found_qr WHERE team_id = ? AND qr_id = ? """
+
+def found_qr():
+	return """ INSERT INTO team_found_qr(team_id, qr_id) VALUES (?, ?) """

@@ -11,6 +11,7 @@ from objects.user import UserVue, UserModelName, UsersModel, RemoveUser, Teammat
 from objects.team import TeamsModel, TeamOf, TeamVue, TeamLeave, TeamModelFromId, NoTeamError
 from objects.objective import ObjectivesModel, ObjectiveVue, DeleteObjectiveVue, ObjectiveModelFromId
 from objects.picture import PictureOfTeam, PictureVue, PicturesOfTeamModel, DeletePictureVue, AcceptPictureVue, AllPicturesModel, PicturesWithStatus
+from objects.qrcode import QRCodeVue, QRCodesModel, QRCodeFromKey, QRDoesntExistError, FoundQRCodeVue
 
 app = Flask(__name__)
 app.secret_key = 'turbo prout prout'
@@ -157,6 +158,19 @@ def random_picture():
 		team = TeamModelFromId(cursor, pic.team_id)
 		return render_template('random_picture.html', team=team, pic=pic, obj=obj)
 
+@app.route('/qrcodes/<qr_key>')
+def found_qrcode(qr_key):
+	""" page quand quelqu'un trouve un qrcode """
+	with Cursor() as cursor:
+		user_id = session['user']
+		team = TeamOf(cursor, user_id)
+		try:
+			qrcode = QRCodeFromKey(cursor, qr_key)
+			firsttime = FoundQRCodeVue(team.team_id, qrcode.qr_id).send_db(cursor)
+			return render_template('find_qr.html', team=team, exists=True, already=(not firsttime), qrcode=qrcode)
+		except QRDoesntExistError:
+			return render_template('find_qr.html', team=team, exists=False)
+
 @app.route('/admin')
 @basic_auth.required
 def admin():
@@ -166,7 +180,8 @@ def admin():
 		teams = TeamsModel(cursor)
 		users = UsersModel(cursor)
 		invalid_pictures = PicturesWithStatus(cursor, 0)
-	return render_template('admin.html', objectives=objs, teams=teams, users=users, pictures=invalid_pictures.pictures)
+		qrcodes = QRCodesModel(cursor)
+	return render_template('admin.html', objectives=objs, teams=teams, users=users, pictures=invalid_pictures.pictures, qrcodes=qrcodes.qrcodes)
 
 @app.route('/admin/user/delete')
 @basic_auth.required
@@ -197,6 +212,21 @@ def admin_accept_picture():
 		AcceptPictureVue(team_id, obj_id).send_db(cursor)
 	return redirect('/admin')
 
+@app.route('/admin/qrcodes/new')
+@basic_auth.required
+def add_qrcode():
+	""" ajoute un nouveau qr code """
+	points = request.args['points']
+	descr = request.args['descr']
+	with Cursor() as cursor:
+		QRCodeVue(points, descr).send_db(cursor)
+	return redirect('/admin')
+
+@app.route('/admin/qrcodes/<qr_key>')
+@basic_auth.required
+def admin_qrcode_img(qr_key):
+	""" retourne le png du qrcode demande """
+	return send_file(join('qrcodes', qr_key + '.png'))
 
 if __name__ == '__main__':
 	app.run('0.0.0.0')

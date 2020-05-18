@@ -4,6 +4,8 @@ DROP TABLE IF EXISTS teams;
 DROP TABLE IF EXISTS team_users;
 DROP TABLE IF EXISTS objectives;
 DROP TABLE IF EXISTS pictures;
+DROP TABLE IF EXISTS qrcodes;
+DROP TABLE IF EXISTS team_found_qr;
 
 PRAGMA foreign_keys = ON;
 
@@ -41,4 +43,20 @@ CREATE TABLE pictures(
 	PRIMARY KEY (team_id, objective_id),
 	FOREIGN KEY (team_id) REFERENCES teams(team_id) ON DELETE CASCADE,
 	FOREIGN KEY (objective_id) REFERENCES objectives(objective_id) ON DELETE CASCADE
+);
+
+CREATE TABLE qrcodes(
+	qr_id INTEGER NOT NULL,
+	key TEXT NOT NULL,
+	points INTEGER NOT NULL,
+	description TEXT NOT NULL,
+	PRIMARY KEY (qr_id)
+);
+
+CREATE TABLE team_found_qr(
+	team_id INTEGER NOT NULL,
+	qr_id INTEGER NOT NULL,
+	PRIMARY KEY (team_id, qr_id),
+	FOREIGN KEY (team_id) REFERENCES teams(team_id) ON DELETE CASCADE,
+	FOREIGN KEY (qr_id) REFERENCES qrcodes(qr_id) ON DELETE CASCADE
 );

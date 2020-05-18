@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+	{% include 'headers.html' %}
+	<title>{{ team.name }}</title>
+	<style type="text/css">
+		body {
+			background-color: {{ team.color.colors[1] }};
+		}
+		.jumbotron {
+			background-color: {{ team.color.colors[0] }};
+		}
+		.element {
+			background-color: {{ team.color.colors[0] }}80;
+		}
+	</style>
+</head>
+<body>
+	<div class="jumbotron">
+		<div class="row text-center">
+			<h2 class="offset-2 col-8">{{ team.name }}</h2>
+		</div>
+	</div>
+	<div class="container">
+		<div class="text-center">
+			<h3>&#x1F3C6;{{ qrcode.points }} {{ qrcode.description }}</h3>
+			{% if exists and already %}
+				<h4>&#x1F625;Your team already found this QR Code&#x1F625;</h4>
+			{% elif exists %}
+				<h4>&#x1F929;Congratulations!&#x1F929;</h4>
+			{% else %}
+				<h4>&#x1F914;This QR Code doesn't exist&#x1F914;</h4>
+			{% endif %}
+			<h3><a href="/team">Back to my team</a></h3>
+		</div>
+	</div>
+</body>
+</html>
