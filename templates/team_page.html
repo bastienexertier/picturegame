@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+	{% include 'headers.html' %}
+	<title>{{ team.name }}</title>
+	<style type="text/css">
+		body {
+			background-color: {{ team.color.colors[1] }};
+		}
+		.jumbotron {
+			background-color: {{ team.color.colors[0] }};
+		}
+		.element {
+			background-color: {{ team.color.colors[0] }}80;
+		}
+	</style>
+</head>
+<body>
+	<div class="jumbotron">
+		<div class="row text-center">
+			<h2 class="offset-2 col-8">{{ team.name }}</h2>
+			<div class="col-2 dropdown">
+	          <span class="dotdotdot" data-toggle="dropdown">&#x22EE;</span>
+	          <ul class="dropdown-menu dropdown-menu-right">
+	          	{% if edit %}
+	            <li>
+	              <a href="team/leave" class="col-4">Leave Team</a>
+	            </li>
+	            {% else %}
+	            <li>
+					<a href="/team" class="col-4">My team</a>
+				</li>
+	            {% endif %}
+	            <li>
+					<a href="/team/list?select=0" class="col-4">Other teams</a>
+	            </li>
+	          </ul>
+	        </div>
+		</div>
+	</div>
+	<div class="container">
+		<div class="text-center">
+			<h2>{{ team.points }} &#x1F3C6;</h2>
+		</div>
+		<div class="element member-list">
+			{% for teammate in teammates %}
+				<span>{{ teammate.name }}</span>
+			{% endfor %}
+		</div>
+		<div>
+			{% for obj in objectives %}
+			<form class="element obj-list" action="/team/picture/add" method=post enctype=multipart/form-data>
+				<div class="text-center obj-row">
+					<h5 class="obj-points">&#x1F3C6;{{ obj.points }}</h5>
+					<h5>{{ obj.description }}</h5>
+					{% if obj.obj_id in pictures and edit %}
+						<h5 class="obj-points">
+							<a href="/team/picture/delete?obj_id={{ obj.obj_id }}" onclick="return delete_picture()">&#x274C;</a>
+						</h5>
+					{% endif %}
+				</div>
+				{% if obj.obj_id in pictures %}
+				<img class="obj-img" src="/picture/{{ pictures[obj.obj_id].filename }}">
+				{% elif edit %}
+				<input type="hidden" name="obj_id" value="{{ obj.obj_id }}">
+				<input type="file" name="file" accept="image/*" onchange="this.form.submit()">
+				<!-- <button class="offset-5 col-2" type="submit">add</button> -->
+				{% endif %}
+			</form>
+			{% endfor %}
+		</div>
+	</div>
+	{% include 'footers.html' %}
+	<script type="text/javascript">
+		function delete_picture() {
+			return confirm("Are you sure you want to delete this picture ?");
+		}
+	</script>
+</body>
+</html>

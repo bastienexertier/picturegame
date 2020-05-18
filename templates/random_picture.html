@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+	{% include 'headers.html' %}
+	<title>{{ team.name }}</title>
+	<style type="text/css">
+		body {
+			background-color: {{ team.color.colors[1] }};
+		}
+		.rnd-side-content {
+			background-color: {{ team.color.colors[0] }};
+		}
+		.element {
+			background-color: {{ team.color.colors[0] }}80;
+		}
+	</style>
+</head>
+<body>
+	<div class="container-fluid">
+		<div class="row text-center" style="height: 100vh;">
+			<div class="col-2 rnd-side-content">
+				<h1>{{ team.name }}</h1>
+				<h2>{{ team.points }} &#x1F3C6;</h2>
+			</div>
+			<div class="offset-2 col-4 rnd-img">
+				<img class="obj-img" src="/picture/{{ pic.filename }}">
+			</div>
+			<div class="offset-2 col-2 rnd-side-content">
+				<h2>{{ obj.description }}</h2>
+			</div>
+		</div>
+		<script type="text/javascript">
+			let timer = setTimeout(reload, 10000);
+
+			function reload() {
+				window.location.href = window.location.href;
+			}
+		</script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+	{% include 'headers.html' %}
+	<title>Objectives</title>
+</head>
+<body>
+	<div class="jumbotron">
+		<div class="row text-center">
+			<h2 class="col-12">Admin</h2>
+		</div>
+	</div>
+	<div class="container">
+		<ul>
+			{% for obj in objectives %}
+			<li>
+				{{ obj.points }} : {{ obj.description }}
+				<a href="delete?obj_id={{ obj.obj_id }}">delete</a>
+			</li>
+			{% endfor %}
+			<form action="new">
+				<li>
+					<input type="number" name="points">
+					<input type="text" name="descr">
+					<button type="submit">add</button>
+				</li>
+			</form>
+		</ul>
+	</div>
+	{% include 'footers.html' %}
+</body>
+</html>

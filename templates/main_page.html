@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+	{% include 'headers.html' %}
+	<title>New user</title>
+</head>
+<body>
+	<div class="jumbotron">
+		<div class="row text-center">
+			<h1 class="col-12">New Player</h1>
+		</div>
+	</div>
+	<div class="container">
+		<form class="name-form" action="newuser">
+			<div class="row text-center">
+				<label for="name">Name</label>
+			</div>
+			<div class="row text-center">
+				<input type="text" name="name" placeholder="Stephan Hoe">
+			</div>
+			<div class="row text-center">
+				<button type="submit">ok</button>
+			</div>
+		</form>
+	</div>
+	{% include 'footers.html' %}
+</body>
+</html>

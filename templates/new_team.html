@@ -1,0 +1,38 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	{% include 'headers.html' %}
+	<title>New Team</title>
+</head>
+<body>
+	<div class="jumbotron">
+		<div class="row text-center">
+			<h2 class="col-12">New Team</h2>
+		</div>
+	</div>
+	<div class="container">
+		<form class="name-form" action="new/go">
+			<div class="row text-center">
+				<label for="name">Team Name</label>
+			</div>
+			<div class="row text-center">
+				<input type="text" name="teamname" placeholder="The not straight unicorns" required="required">
+			</div>
+			<div class="form-check row text-center">
+				{% for color in colors %}
+					<label class="form-check-label" for="color">
+						<div style="background-color: {{ color.colors[0] }}" class="color-checkbox">
+							<input class="form-check-input" type="radio" name="color" value="{{ color.color_id }}" checked>
+						</div>
+					</label>
+				{% endfor %}
+			</div>
+			<div class="row text-center">
+				<button type="submit">ok</button>
+			</div>
+		</form>
+	</div>
+	{% include 'footers.html' %}
+</body>
+</html>
