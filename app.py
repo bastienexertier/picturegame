@@ -11,7 +11,7 @@ from objects.user import UserVue, UserModelName, UsersModel, RemoveUser, Teammat
 from objects.team import TeamsModel, TeamOf, TeamVue, TeamLeave, TeamModelFromId, NoTeamError
 from objects.objective import ObjectivesModel, ObjectiveVue, DeleteObjectiveVue, ObjectiveModelFromId
 from objects.picture import PictureOfTeam, PictureVue, PicturesOfTeamModel, DeletePictureVue, AllPicturesModel
-from objects.qrcode import QRCodeVue, QRCodesModel
+from objects.qrcode import QRCodeVue, QRCodesModel, QRCodeFromKey, QRDoesntExistError, FoundQRCodeVue
 
 app = Flask(__name__)
 app.secret_key = 'turbo prout prout'
@@ -167,9 +167,17 @@ def random_picture():
 		return render_template('random_picture.html', team=team, pic=pic, obj=obj)
 
 @app.route('/qrcodes/<qr_key>')
-def qrcode(qr_key):
+def found_qrcode(qr_key):
 	""" page quand quelqu'un trouve un qrcode """
-	return "bravo tu as trouve le qrcode {}".format(qr_key)
+	with Cursor() as cursor:
+		user_id = session['user']
+		team = TeamOf(cursor, user_id)
+		try:
+			qrcode = QRCodeFromKey(cursor, qr_key)
+			firsttime = FoundQRCodeVue(team.team_id, qrcode.qr_id).send_db(cursor)
+			return render_template('find_qr.html', team=team, exists=True, already=(not firsttime), qrcode=qrcode)
+		except QRDoesntExistError:
+			return render_template('find_qr.html', team=team, exists=False)
 
 @app.route('/admin')
 @basic_auth.required
