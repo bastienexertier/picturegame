@@ -133,12 +133,6 @@ def delete_picture():
 		DeletePictureVue(team_id, obj_id).send_db(cursor)
 	return redirect('/team')
 
-@app.route('/objectives/list')
-def obj_list():
-	with Cursor() as cursor:
-		objs = ObjectivesModel(cursor)
-	return render_template('objectives_list.html', objectives=objs.objectives)
-
 @app.route('/objectives/new')
 def new_obj():
 	points = request.args['points']
