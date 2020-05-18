@@ -65,14 +65,14 @@ class PicturesModel(Model):
 			res[team_id][obj_id] = PictureModel(team_id, obj_id, filename, status)
 		return res
 
-class PicturesOfTeamModel(PicturesModel, Model):
+class PicturesOfTeamModel(PicturesModel):
 	def __init__(self, cursor, team_id):
 		self.team_id = team_id
 		load_req = req.get_team_pictures()
 		args = (self.team_id,)
 		super().__init__(cursor, self._load_pictures(cursor, load_req, args).pop(team_id, {}))
 
-class AllPicturesModel(PicturesModel, Model):
+class AllPicturesModel(PicturesModel):
 	def __init__(self, cursor):
 		load_req = req.get_all_pictures()
 		super().__init__(cursor, self._load_pictures(cursor, load_req, ()))
@@ -84,9 +84,23 @@ class AllPicturesModel(PicturesModel, Model):
 				pic_list.append(pic)
 		return choice(pic_list)
 
+class PicturesWithStatus(PicturesModel):
+	""" une classe pour aller chercher les images avec un certain status """
+	def __init__(self, cursor, status):
+		self.status = status
+		load_req = req.get_pictures_w_status()
+		super().__init__(cursor, self._load_pictures(cursor, load_req, (status,)))
+
 class DeletePictureVue(Picture, Vue):
 	def _check(self, cursor):
 		return self.is_uploaded(cursor)
 
 	def _send_db(self, cursor):
 		cursor.add(req.delete_picture(), (self.team_id, self.objective_id))
+
+class AcceptPictureVue(Picture, Vue):
+	def _check(self, cursor):
+		return self.is_uploaded(cursor)
+
+	def _send_db(self, cursor):
+		cursor.add(req.accept_picture(), (self.team_id, self.objective_id))

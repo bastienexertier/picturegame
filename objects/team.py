@@ -127,3 +127,6 @@ class TeamsModel(Model):
 				team.set_medal(current_medal)
 			current_medal += 1
 		return res
+
+	def to_dict(self):
+		return {team.team_id: team for team in self.teams}

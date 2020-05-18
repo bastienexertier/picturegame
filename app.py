@@ -10,7 +10,7 @@ from model.dbi import Cursor
 from objects.user import UserVue, UserModelName, UsersModel, RemoveUser, TeammateVue, TeammateModel, Teammates
 from objects.team import TeamsModel, TeamOf, TeamVue, TeamLeave, TeamModelFromId, NoTeamError
 from objects.objective import ObjectivesModel, ObjectiveVue, DeleteObjectiveVue, ObjectiveModelFromId
-from objects.picture import PictureOfTeam, PictureVue, PicturesOfTeamModel, DeletePictureVue, AllPicturesModel
+from objects.picture import PictureOfTeam, PictureVue, PicturesOfTeamModel, DeletePictureVue, AcceptPictureVue, AllPicturesModel, PicturesWithStatus
 
 app = Flask(__name__)
 app.secret_key = 'turbo prout prout'
@@ -34,14 +34,6 @@ def new_user():
 			return redirect('/')
 		session['user'] = max(cursor.cursor.lastrowid, 1)
 	return redirect('/team/list?select=1')
-
-@app.route('/deleteuser')
-def delete_user():
-	""" supprime l'utilisateur specifie """
-	user_id = request.args['user']
-	with Cursor() as cursor:
-		RemoveUser(user_id).send_db(cursor)
-	return redirect('/admin')
 
 @app.route('/team')
 def my_team():
@@ -173,7 +165,38 @@ def admin():
 		objs = ObjectivesModel(cursor)
 		teams = TeamsModel(cursor)
 		users = UsersModel(cursor)
-	return render_template('admin.html', objectives=objs.objectives, teams=teams.teams, users=users.users)
+		invalid_pictures = PicturesWithStatus(cursor, 0)
+	return render_template('admin.html', objectives=objs, teams=teams, users=users, pictures=invalid_pictures.pictures)
+
+@app.route('/admin/user/delete')
+@basic_auth.required
+def delete_user():
+	""" supprime l'utilisateur specifie """
+	user_id = request.args['user']
+	with Cursor() as cursor:
+		RemoveUser(user_id).send_db(cursor)
+	return redirect('/admin')
+
+@app.route('/admin/picture/delete')
+@basic_auth.required
+def admin_delete_picture():
+	""" suppression d'une photo en tant qu'admin """
+	team_id = request.args['team']
+	obj_id = request.args['obj']
+	with Cursor() as cursor:
+		DeletePictureVue(team_id, obj_id).send_db(cursor)
+	return redirect('/admin')
+
+@app.route('/admin/picture/accept')
+@basic_auth.required
+def admin_accept_picture():
+	""" changement du status d'une photo """
+	team_id = request.args['team']
+	obj_id = request.args['obj']
+	with Cursor() as cursor:
+		AcceptPictureVue(team_id, obj_id).send_db(cursor)
+	return redirect('/admin')
+
 
 if __name__ == '__main__':
 	app.run('0.0.0.0')

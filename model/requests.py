@@ -65,6 +65,9 @@ def add_picture():
 def delete_picture():
 	return """ DELETE FROM pictures WHERE team_id = ? AND objective_id = ? """
 
+def accept_picture():
+	return """ UPDATE pictures SET status = 1 WHERE team_id = ? AND objective_id = ? """
+
 def get_picture():
 	return """ SELECT * FROM pictures WHERE team_id = ? AND objective_id = ? """
 
@@ -73,6 +76,9 @@ def get_team_pictures():
 
 def get_all_pictures():
 	return """ SELECT * FROM pictures """
+
+def get_pictures_w_status():
+	return """ SELECT * FROM pictures WHERE status = ? """
 
 def get_team_points():
 	return """ 

@@ -49,3 +49,7 @@ class ObjectivesModel(Model):
 		for obj in req_res:
 			res.append(ObjectiveModel(obj['objective_id'], obj['points'], obj['description']))
 		return res
+
+	def to_dict(self):
+		""" retourne les obj sous forme de dict """
+		return {obj.obj_id: obj for obj in self.objectives}

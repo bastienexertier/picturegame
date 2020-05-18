@@ -2,6 +2,8 @@
 <html>
 <head>
 	{% include 'headers.html' %}
+	{% set teams_dict = teams.to_dict() %}
+	{% set objs_dict = objectives.to_dict() %}
 	<title>Admin</title>
 </head>
 <body>
@@ -17,7 +19,7 @@
 				<div class="element">
 					<h3>Objectives</h3>
 					<hr>
-					{% for obj in objectives %}
+					{% for obj in objectives.objectives %}
 						<div class="obj-row">
 							<h5>&#x1F3C6;{{ obj.points }}</h5>
 							<h6>{{ obj.description }}</h6>
@@ -36,7 +38,7 @@
 				<div class="element">
 					<h3>Teams</h3>
 					<hr>
-					{% for team in teams %}
+					{% for team in teams.teams %}
 						<div class="obj-row">
 							<h5>
 								{% if team.medal == 1 %}&#x1F947;
@@ -59,24 +61,54 @@
 				<div class="element">
 					<h3>Users</h3>
 					<hr>
-					{% for user in users %}
+					{% for user in users.users %}
 						<div class="obj-row">
-							{{ user.name }}<a href="deleteuser?user={{ user.user_id }}" onclick="return confirm_delete_user(this);">&#x274C;</a>
+							{{ user.name }}<a href="/admin/user/delete?user={{ user.user_id }}" onclick="return confirm_delete_user(this);">&#x274C;</a>
 						</div>
 					{% endfor %}
 				</div>
 			</div>
+
+			{% for team_id in pictures.keys() %}
+				<div class="col-12 col-md-6 col-xl-4 element-container">
+					<div class="element">
+						<h3>{{ teams_dict[team_id].name }}</h3>
+						<hr>
+						<div class="obj-list">
+							{% for obj_id, pic in pictures[team_id].items() %}
+								<div>
+									<div class="obj-row">
+										<a href="/admin/picture/delete?team={{ team_id }}&obj={{ obj_id }}">&#x274C;</a>
+										<h6>{{ objs_dict[obj_id].description }}</h6>
+										<a href="/admin/picture/accept?team={{ team_id }}&obj={{ obj_id }}">&#x2705;</a>
+									</div>
+									<img class="obj-img" src="/picture/{{ pic.filename }}">
+								</div>
+							{% endfor %}
+						</div>
+					</div>
+				</div>
+			{% endfor %}
+
+
 		</div>
 	</div>
 	{% include 'footers.html' %}
 	<script type="text/javascript">
 		function confirm_delete_user(t) {
-			return confirm(`Are you sure you want to delete user ${t.previousSibling.textContent.trim()} ?`);
+			return confirm(`Are you sure you want to delete user ${t.previousSibling.textContent.trim()}?`);
 		}
 
 		function confirm_delete_obj(t) {
-			console.log(t);
-			return confirm(`Are you sure you want to delete the objective ${t.previousElementSibling.textContent.trim()} ?`);
+			return confirm(`Are you sure you want to delete the objective ${t.previousElementSibling.textContent.trim()}?`);
+		}
+
+		function confirm_delete_pic(t) {
+			return confirm(`Are you sure you want to delete this picture?`);
+		}
+
+		function confirm_accept_pic(t) {
+			return confirm(`Are you sure you want to accept this picture?`);
 		}
 	</script>
 </body>
