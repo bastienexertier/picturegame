@@ -21,7 +21,7 @@
 					<hr>
 					<div class="row">
 						{% for user in users.users %}
-							<a class="col-2" href="/admin/user/delete?user={{ user.user_id }}" onclick="return confirm_delete_user(this);">&#x274C;</a>
+							<a class="col-2" href="/admin/user/delete?user={{ user.user_id }}" onclick="return delete_element('user', this);">&#x274C;</a>
 							<h5 class="col-10 line-middle">{{ user.name }}</h5>
 						{% endfor %}
 					</div>
@@ -57,7 +57,7 @@
 					<hr>
 					<div class="row">
 						{% for obj in objectives.objectives %}
-							<a class="col-2 line-left" href="objectives/delete?obj_id={{ obj.obj_id }}" onclick="return confirm_delete_obj(this);">&#x274C;</a>
+							<a class="col-2 line-left" href="objectives/delete?obj_id={{ obj.obj_id }}" onclick="return delete_element('objective', this);">&#x274C;</a>
 							<h5 class="col-7 line-middle">{{ obj.description }}</h5>
 							<h5 class="col-3 line-right">{{ obj.points }}&#x1F3C6;</h5>
 						{% endfor %}
@@ -76,7 +76,7 @@
 					<hr>
 					<div class="row">
 						{% for qrcode in qrcodes %}
-								<a class="col-2 line-left" href="/admin/qrcodes/delete?qr={{ qrcode.key }}" onclick="return confirm_delete_qr(this);">&#x274C;</a>
+								<a class="col-2 line-left" href="/admin/qrcodes/delete?qr={{ qrcode.key }}" onclick="return delete_element('QR code', this);">&#x274C;</a>
 								<h5 class="col-7 line-middle">
 									<a href="/admin/qrcodes/{{ qrcode.key }}">{{ qrcode.description }}</a>
 								</h5>
@@ -117,19 +117,10 @@
 	</div>
 	{% include 'footers.html' %}
 	<script type="text/javascript">
-		function confirm_delete_user(t) {
-			console.log(t);
-			return confirm(`Delete user ${t.previousElementSibling.textContent.trim()}?`);
+		function delete_element(element_type, t) {
+			return confirm(`Delete ${element_type} '${t.nextElementSibling.textContent.trim()}'?`);
 		}
-
-		function confirm_delete_obj(t) {
-			return confirm(`Delete objective ${t.nextElementSibling.textContent.trim()}?`);
-		}
-
-		function confirm_delete_qr(t) {
-			return confirm(`Delete QR code ${t.nextElementSibling.textContent.trim()}?`);
-		}
-
+		
 		function confirm_delete_pic(t) {
 			return confirm(`Delete this picture?`);
 		}

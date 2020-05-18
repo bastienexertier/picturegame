@@ -118,7 +118,7 @@ img {
 	padding-top: 15%;
 }
 
-input {
+input[type=text], input[type=number] {
 	color: white;
 	background-color: #192a56;
 	border-color: #192a56;

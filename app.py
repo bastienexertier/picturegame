@@ -7,7 +7,8 @@ from flask_basicauth import BasicAuth
 
 import colors
 from model.dbi import Cursor
-from objects.user import UserVue, UserModelName, UsersModel, RemoveUser, TeammateVue, TeammateModel, Teammates
+from objects.user import UserVue, UserModelName, UsersModel, RemoveUser, UsersFromTeam
+from objects.teammate import TeammateVue, TeammateModel
 from objects.team import TeamsModel, TeamOf, TeamVue, TeamLeave, TeamModelFromId, NoTeamError
 from objects.objective import ObjectivesModel, ObjectiveVue, DeleteObjectiveVue, ObjectiveModelFromId
 from objects.picture import PictureOfTeam, PictureVue, PicturesOfTeamModel, DeletePictureVue, AcceptPictureVue, AllPicturesModel, PicturesWithStatus
@@ -48,11 +49,11 @@ def my_team():
 			team = TeamModelFromId(cursor, team_id)
 		except NoTeamError:
 			return redirect('/team/list?select=0')
-		teammates = Teammates(cursor, team.team_id)
+		teammates = UsersFromTeam(cursor, team.team_id)
 		objs = sorted(ObjectivesModel(cursor).objectives, key=lambda obj: obj.points)
 		pictures = PicturesOfTeamModel(cursor, team.team_id)
 		edit = 'team' not in request.args or int(request.args['team']) == teammate.team_id
-	return render_template('team_page.html', edit=edit, team=team, teammates=teammates.teammates, objectives=objs, pictures=pictures.pictures)
+	return render_template('team_page.html', edit=edit, team=team, teammates=teammates.users, objectives=objs, pictures=pictures.pictures)
 
 @app.route('/team/new')
 def new_team():

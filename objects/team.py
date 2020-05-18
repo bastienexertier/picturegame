@@ -1,6 +1,6 @@
 
 from objects.jsonable import Vue, Model
-from objects.user import UserModel, TeammateVue
+from objects.teammate import TeammateVue
 import model.requests as req
 import colors
 
@@ -69,7 +69,7 @@ class TeamVue(Team, Vue):
 		team_id = cursor.add(req.new_team(), (self.name, self.color.color_id))
 		TeammateVue(self.user_id, team_id, 5).send_db(cursor)
 
-class RemoveTeam(Vue):
+class RemoveTeamIfEmpty(Vue):
 	def __init__(self, team_id):
 		self.team_id = team_id
 
@@ -78,18 +78,6 @@ class RemoveTeam(Vue):
 
 	def _send_db(self, cursor):
 		cursor.add(req.delete_team(), (self.team_id,))
-
-class TeamLeave(Vue):
-	def __init__(self, user_id):
-		self.user_id = user_id
-
-	def _check(self, cursor):
-		return True
-
-	def _send_db(self, cursor):
-		team_id = cursor.get_one(req.team_of_user(), (self.user_id,))['team_id']
-		cursor.add(req.leave_team(), (self.user_id,))
-		RemoveTeam(team_id).send_db(cursor)
 
 class TeamsModel(Model):
 	def __init__(self, cursor):
@@ -130,3 +118,15 @@ class TeamsModel(Model):
 
 	def to_dict(self):
 		return {team.team_id: team for team in self.teams}
+
+class TeamLeave(Vue):
+	def __init__(self, user_id):
+		self.user_id = user_id
+
+	def _check(self, cursor):
+		return bool(cursor.get_one(req.team_of_user(), (self.user_id,)))
+
+	def _send_db(self, cursor):
+		team_id = cursor.get_one(req.team_of_user(), (self.user_id,))['team_id']
+		cursor.add(req.leave_team(), (self.user_id,))
+		RemoveTeamIfEmpty(team_id).send_db(cursor)
