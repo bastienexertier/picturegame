@@ -47,7 +47,9 @@ CREATE TABLE pictures(
 
 CREATE TABLE qrcodes(
 	qr_id INTEGER NOT NULL,
+	key TEXT NOT NULL,
 	points INTEGER NOT NULL,
+	description TEXT NOT NULL,
 	PRIMARY KEY (qr_id)
 );
 
