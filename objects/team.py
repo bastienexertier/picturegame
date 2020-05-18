@@ -20,8 +20,12 @@ class TeamModel(Team, Model):
 		self.points = points
 
 	def _load_points(self, cursor, team_id):
-		points = cursor.get_one(req.get_team_points(), (team_id,))['points']
-		return points if points is not None else 0
+		objs_points = cursor.get_one(req.get_team_points_from_objs(), (team_id,))['points']
+		qrs_points = cursor.get_one(req.get_team_points_from_qrs(), (team_id,))['points']
+		total = 0
+		total += objs_points if objs_points is not None else 0 
+		total += qrs_points if qrs_points is not None else 0 
+		return total
 
 class TeamModelFromId(TeamModel):
 	def __init__(self, cursor, team_id):
@@ -87,14 +91,17 @@ class TeamsModel(Model):
 
 	def __load_teams(self):
 		res = []
-		team_score = {}
-		req_res = self.cursor.get(req.all_teams(), ())
-		for score in self.cursor.get(req.get_points(), ()):
-			team_score[score['team_id']] = score['points']
+		points_from_objs = {}
+		for score in self.cursor.get(req.get_points_from_objs(), ()):
+			points_from_objs[score['team_id']] = score['points']
 
-		for team in req_res:
+		points_from_qrs = {}
+		for score in self.cursor.get(req.get_points_from_qrs(), ()):
+			points_from_qrs[score['team_id']] = score['points']
+
+		for team in self.cursor.get(req.all_teams()):
 			team_id = team['team_id']
-			score = team_score.pop(team_id, 0)
+			score = points_from_objs.pop(team_id, 0) + points_from_qrs.pop(team_id, 0)
 			team = TeamMedalModel(self.cursor, team_id, team['name'], team['color'], score)
 			res.append(team)
 		return res
