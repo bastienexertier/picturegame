@@ -1,3 +1,4 @@
+""" module gerant les objets equipes """
 
 from itertools import chain
 
@@ -10,54 +11,58 @@ class NoTeamError(Exception):
 	""" une exception si on ne trouve pas de team """
 
 class Team:
+	""" une equipe basique """
 	def __init__(self, name, color):
 		self.name = name
 		self.color = colors.Color(color)
 
 class TeamModel(Team, Model):
+	""" une equipe venant du model """
 	def __init__(self, cursor, team_id, team_name, color, points):
 		super().__init__(team_name, color)
 		self.cursor = cursor
 		self.team_id = team_id
 		self.points = points
 
-	def _load_points(self, cursor, team_id):
-		objs_points = cursor.get_one(req.get_team_points_from_objs(), (team_id,))['points']
-		qrs_points = cursor.get_one(req.get_team_points_from_qrs(), (team_id,))['points']
-		total = 0
-		total += objs_points if objs_points is not None else 0 
-		total += qrs_points if qrs_points is not None else 0 
-		return total
+	@staticmethod
+	def _load_points(cursor, team_id):
+		objs_points = cursor.get_one(req.get_team_points_from_objs(), (team_id,))
+		qrs_points = cursor.get_one(req.get_team_points_from_qrs(), (team_id,))
+		return objs_points.pop('points', 0) + qrs_points.pop('points', 0)
 
 class TeamModelFromId(TeamModel):
+	""" une equipe a partir d'une id de team """
 	def __init__(self, cursor, team_id):
-		name, color = self.__load(cursor, team_id)
-		super().__init__(cursor, team_id, name, color, self._load_points(cursor, team_id))
+		name, color = TeamModelFromId.__load(cursor, team_id)
+		points = TeamModel._load_points(cursor, team_id)
+		super().__init__(cursor, team_id, name, color, points)
 
-	def __load(self, cursor, team_id):
+	@staticmethod
+	def __load(cursor, team_id):
 		req_res = cursor.get_one(req.team(), (team_id,))
 		if req_res is None:
 			raise NoTeamError('team {} does not exists'.format(team_id))
 		return req_res['name'], req_res['color']
 
 class TeamMedalModel(TeamModel):
-	def __init__(self, cursor, team_id, team_name, color, points):
-		super().__init__(cursor, team_id, team_name, color, points)
+	""" une Team avec un attribut medaille, connait deja son nombre de points """
+	def __init__(self, *args):
+		super().__init__(*args)
 		self.medal = 4
 
 	def set_medal(self, new_medal):
+		""" set la medaille """
 		self.medal = new_medal
 
-	def get_medal(self):
-		return self.medal
-
-class TeamOf(TeamModel):
+class TeamOf(TeamModelFromId):
+	""" represente l'equipe d'un user """
 	def __init__(self, cursor, user_id):
 		self.user_id = user_id
-		team = cursor.get_one(req.team_of_user(), (user_id,))
-		super().__init__(cursor, team['team_id'], team['name'], team['color'], self._load_points(cursor, team['team_id']))
+		team_id = cursor.get_one(req.team_of_user(), (user_id,))['team_id']
+		super().__init__(cursor, team_id)
 
 class TeamVue(Team, Vue):
+	""" une equipe venant de la vue, envoie dans la bd apres verif """
 	def __init__(self, user_id, team_name, color):
 		super().__init__(team_name, color)
 		self.user_id = user_id
@@ -79,7 +84,7 @@ class TeamsModel(Model):
 	""" une list de team venant du model, calcul les points et les medailles """
 	def __init__(self, cursor):
 		self.teams = TeamsModel.__load_teams(cursor)
-		self.teams = self.__load_medals()
+		self.teams = TeamsModel.__load_medals(self.teams)
 
 	@staticmethod
 	def __load_points(cursor):
@@ -97,6 +102,7 @@ class TeamsModel(Model):
 
 	@staticmethod
 	def __load_teams(cursor):
+		""" charge les points des equipes """
 		res = []
 		points = TeamsModel.__load_points(cursor)
 
@@ -106,8 +112,10 @@ class TeamsModel(Model):
 			res.append(TeamMedalModel(cursor, team_id, team['name'], team['color'], score))
 		return res
 
-	def __load_medals(self):
-		res = sorted(self.teams, key=lambda team: -team.points)
+	@staticmethod
+	def __load_medals(teams):
+		""" modifie les medailles """
+		res = sorted(teams, key=lambda team: -team.points)
 		scores = {}
 		for team in res:
 			if team.points not in scores:
@@ -131,14 +139,15 @@ class TeamLeave(Vue):
 	""" represente un user qui quitte son equipe, l'equipe est detruite si vide """
 	def __init__(self, user_id):
 		self.user_id = user_id
+		self.team_id = None
 
 	def _check(self, cursor):
-		return bool(cursor.get_one(req.team_of_user(), (self.user_id,)))
+		self.team_id = cursor.get_one(req.team_of_user(), (self.user_id,))['team_id']
+		return bool(self.team_id)
 
 	def _send_db(self, cursor):
-		team_id = cursor.get_one(req.team_of_user(), (self.user_id,))['team_id']
 		cursor.add(req.leave_team(), (self.user_id,))
-		RemoveTeamIfEmpty(team_id).send_db(cursor)
+		RemoveTeamIfEmpty(self.team_id).send_db(cursor)
 
 class RemoveTeamIfEmpty(Vue):
 	""" suppression de l'equipe si elle est vide """

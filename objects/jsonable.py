@@ -4,9 +4,6 @@ from sqlite3 import IntegrityError
 
 class Model:
 	""" une classe abstraite pour les objs venant de la bd """
-	def json(self):
-		""" transformation de l'objet en json """
-		raise NotImplementedError('must override')
 
 class Vue:
 	""" une classe abstraire pour les objets a verifier, et envoyer dans la db """

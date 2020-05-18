@@ -27,7 +27,7 @@ def team_id_of_user():
 	return """ SELECT team_id, status FROM team_users WHERE user_id = ? """
 
 def team_of_user():
-	return """ SELECT t.team_id, t.name, t.color FROM teams as t, team_users as tu WHERE tu.user_id = ? AND tu.team_id = t.team_id """
+	return """ SELECT team_id FROM team_users WHERE user_id = ?  """
 
 def users_of_team():
 	return """ SELECT u.user_id, u.name FROM users as u, teams as t, team_users as tu WHERE t.team_id = ? AND tu.team_id = t.team_id AND tu.user_id = u.user_id """
