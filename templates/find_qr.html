@@ -23,16 +23,27 @@
 	</div>
 	<div class="container">
 		<div class="text-center">
-			<h3>&#x1F3C6;{{ qrcode.points }} {{ qrcode.description }}</h3>
-			{% if exists and already %}
-				<h4>&#x1F625;Your team already found this QR Code&#x1F625;</h4>
-			{% elif exists %}
-				<h4>&#x1F929;Congratulations!&#x1F929;</h4>
-			{% else %}
-				<h4>&#x1F914;This QR Code doesn't exist&#x1F914;</h4>
-			{% endif %}
-			<h3><a href="/team">Back to my team</a></h3>
+			<div class="col-12 col-md-6 col-xl-4 element-container">
+				<div class="element">
+					<h3>&#x1F389; Yay! &#x1F389;</h3>
+					<hr>
+					{% if exists and already %}
+						<h5>But your team already found</h5>
+						<h4 style="font-style: italic;">{{ qrcode.description }}</h4>
+						<h5>&#x1F625;</h5>
+					{% elif exists %}
+						<h5>You found a secret QR!</h5>
+						<h4 style="font-style: italic;">{{ qrcode.description }}</h4>
+						<h5>Your team wins {{ qrcode.points }}&#x1F3C6;!</h5>
+					{% else %}
+						<h5>&#x1F914;This QR Code doesn't exist&#x1F914;</h5>
+					{% endif %}
+				</div>
+			</div>
 		</div>
 	</div>
+	<script type="text/javascript">
+		window.setTimeout(() => window.location = '/team', 5000);
+	</script>
 </body>
 </html>
