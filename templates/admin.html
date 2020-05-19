@@ -30,7 +30,7 @@
 
 			<div class="col-12 col-md-6 col-xl-4 element-container">
 				<div class="element">
-					<h3>Teams</h3>
+					<h3>&#x1F530; Teams</h3>
 					<hr>
 					<div class="row">
 						{% for team in teams.teams %}
@@ -53,7 +53,7 @@
 
 			<div class="col-12 col-md-6 col-xl-4 element-container">
 				<div class="element">
-					<h3>Objectives</h3>
+					<h3>&#x1F5BC; Pictures</h3>
 					<hr>
 					<div class="row">
 						{% for obj in objectives.objectives %}
@@ -72,7 +72,7 @@
 
 			<div class="col-12 col-md-6 col-xl-4 element-container">
 				<div class="element">
-					<h3>QR Codes</h3>
+					<h3>&#x1F92B; Secret QR Codes</h3>
 					<hr>
 					<div class="row">
 						{% for qrcode in qrcodes %}
@@ -94,7 +94,7 @@
 			{% for team_id in pictures.keys() %}
 				<div class="col-12 col-md-6 col-xl-4 element-container">
 					<div class="element">
-						<h3>{{ teams_dict[team_id].name }}</h3>
+						<h3>&#x1F5BC; {{ teams_dict[team_id].name }}</h3>
 						<hr>
 						<div class="obj-list">
 							{% for obj_id, pic in pictures[team_id].items() %}

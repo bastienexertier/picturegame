@@ -18,5 +18,5 @@ class Colors:
 class Color:
 	""" un objet couleur a partir d'une id """
 	def __init__(self, color_id):
-		self.color_id = color_id%7
+		self.color_id = color_id%len(COLORS)
 		self.colors = COLORS[self.color_id]
