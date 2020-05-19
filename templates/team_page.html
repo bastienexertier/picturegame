@@ -39,28 +39,34 @@
 				<div class="element">
 					<h3>&#x1F64B; Members</h3>
 					<hr>
-					{% for teammate in teammates %}
-						<span>{{ teammate.name }}</span>
-					{% endfor %}
+					<div class="box-list">
+						{% for teammate in teammates %}
+							<span>{{ teammate.name }}</span>
+						{% endfor %}
+					</div>
 				</div>
 			</div>
 
-			<div class="col-12 col-md-6 col-xl-4 element-container">
-				<div class="element">
-					<h3>&#x1F92B; Secrets</h3>
-					<hr>
-					{% for qr in qrs.qrcodes %}
-						<span onclick="alert('{{ qr.description }}');">
-							{% if qr.qr_id in team_qrs_dict %}
-								&#x1F49A;
-							{% else %}
-								&#x1F534;
-							{% endif %}
-							{{ qr.points }}&#x1F3C6;
-						</span>
-					{% endfor %}
+			{% if qrs.qrcodes %}
+				<div class="col-12 col-md-6 col-xl-4 element-container">
+					<div class="element">
+						<h3>&#x1F92B; Secrets</h3>
+						<hr>
+						<div class="box-list">
+							{% for qr in qrs.qrcodes %}
+								<span onclick="alert('{{ qr.description }}');">
+									{% if qr.qr_id in team_qrs_dict %}
+										&#x1F535;
+									{% else %}
+										&#x1F534;
+									{% endif %}
+									{{ qr.points }}&#x1F3C6;
+								</span>
+							{% endfor %}
+						</div>
+					</div>
 				</div>
-			</div>
+			{% endif %}
 
 			{% for obj in objectives %}		
 			<div class="col-12 col-md-6 col-xl-4 element-container">
@@ -97,6 +103,7 @@
 				<div class="element">
 					<h3>Actions</h3>
 					<hr>
+					<div class="box-list">
 						{% if edit %}
 						<span>
 							<a href="team/leave" class="col-4" onclick="return confirm('Are you sure?')">Leave Team</a>
@@ -109,6 +116,7 @@
 						<span>
 							<a href="/team/list?select=0" class="col-4">Other teams</a>
 						</span>
+					</div>
 				</div>
 			</div>
 
