@@ -42,7 +42,7 @@ def new_user():
 def my_team():
 	""" si l'id de la team est donnee, on montre cette team, avec un acces en edition si c'est
 	la team de user. Sinon, affiche la team de user avec edtiion """
-	user_id = getters.user(session)
+	user_id = session.pop('user', None)
 	with Cursor() as cursor:
 
 		team_id = -1
