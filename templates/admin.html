@@ -22,7 +22,7 @@
 					<div class="row">
 						{% for user in users.users %}
 							<a class="col-2" href="/admin/user/delete?user={{ user.user_id }}" onclick="return delete_element('user', this);">&#x274C;</a>
-							<h5 class="col-10 line-middle">{{ user.name }}</h5>
+							<h5 class="col-10 line-middle ellipseable">{{ user.name }}</h5>
 						{% endfor %}
 					</div>
 				</div>
@@ -40,7 +40,7 @@
 								{% elif team.medal == 3 %}&#x1F949;
 								{% else %}&#x1F44D;{% endif %}
 							</h5>
-							<h5 class="col-6 line-middle">
+							<h5 class="col-6 line-middle ellipseable">
 								<a href="/team?team={{ team.team_id }}">{{ team.name }}</a>
 							</h5>
 							<h5 class="col-4 line-right">
