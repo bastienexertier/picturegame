@@ -13,7 +13,7 @@ from objects.teammate import TeammateVue
 from objects.team import TeamsModel, TeamOf, TeamVue, TeamLeave, TeamModelFromId, NoTeamError
 from objects.objective import ObjectivesModel, ObjectiveVue, DeleteObjectiveVue, ObjectiveModelFromId
 from objects.picture import PictureOfTeam, PictureVue, PicturesOfTeamModel, DeletePictureVue, AcceptPictureVue, AllPicturesModel, PicturesWithStatus
-from objects.qrcode import QRCodeVue, QRCodesModel, QRCodeFromKey, QRDoesntExistError, FoundQRCodeVue, RemoveQRCode
+from objects.qrcode import QRCodeVue, AllQRCodesModel, QRCodeFromKey, QRDoesntExistError, FoundQRCodeVue, RemoveQRCode, QRCodesOfTeam
 
 app = Flask(__name__)
 app.secret_key = 'turbo prout prout'
@@ -56,9 +56,12 @@ def my_team():
 		teammates = UsersFromTeam(cursor, team_id)
 		objs = ObjectivesModel(cursor).to_sorted_list()
 		pictures = PicturesOfTeamModel(cursor, team.team_id)
+		all_qrs = AllQRCodesModel(cursor)
+		team_qrs = QRCodesOfTeam(cursor, team_id)
 
 	return render_template('team_page.html', edit=is_my_team, team=team,\
-		teammates=teammates.users, objectives=objs, pictures=pictures.pictures)
+		teammates=teammates.users, objectives=objs, pictures=pictures.pictures, \
+		qrs=all_qrs, team_qrs=team_qrs)
 
 def get_team_id(cursor, user_id, args):
 	""" essaye de trouver l'id de la team """
@@ -199,7 +202,7 @@ def admin():
 		teams = TeamsModel(cursor)
 		users = UsersModel(cursor)
 		invalid_pictures = PicturesWithStatus(cursor, 0)
-		qrcodes = QRCodesModel(cursor)
+		qrcodes = AllQRCodesModel(cursor)
 	return render_template('admin.html', objectives=objs, teams=teams, users=users, pictures=invalid_pictures.pictures, qrcodes=qrcodes.qrcodes)
 
 @app.route('/admin/user/delete')

@@ -59,7 +59,7 @@ img {
 .obj-img {
 	border-radius: 70px;
 	max-width: 100%;
-	margin: 20px auto;
+	margin: 0px auto;
 	height: auto;
 }
 
@@ -140,4 +140,11 @@ button {
   background-color: inherit;
   cursor: pointer;
   padding: 0px;
+}
+
+div.element span {
+	cursor: pointer;
+	padding: 4px 8px;
+	margin: 0px 3px;
+	border-radius: 3px;
 }

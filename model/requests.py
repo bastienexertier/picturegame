@@ -163,3 +163,17 @@ def has_found_qr():
 
 def found_qr():
 	return """ INSERT INTO team_found_qr(team_id, qr_id) VALUES (?, ?) """
+
+def all_qr_found_by_team():
+	return """
+		SELECT 
+			qrs.points as points,
+			qrs.description as description,
+			qrs.qr_id as qr_id,
+			qrs.key as key
+		FROM
+			team_found_qr as found_qr,
+			qrcodes as qrs
+		WHERE
+			qrs.qr_id = found_qr.qr_id
+			AND found_qr.team_id = ? """
