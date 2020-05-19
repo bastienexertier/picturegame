@@ -53,3 +53,7 @@ class ObjectivesModel(Model):
 	def to_dict(self):
 		""" retourne les obj sous forme de dict """
 		return {obj.obj_id: obj for obj in self.objectives}
+
+	def to_sorted_list(self):
+		""" retourne la list d'objs sous forme de liste triee par nb de points """
+		return sorted(self.objectives, key=lambda obj: obj.points)

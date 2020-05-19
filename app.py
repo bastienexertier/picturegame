@@ -1,4 +1,4 @@
- 
+
 
 from os.path import join
 from json import dumps
@@ -40,25 +40,41 @@ def new_user():
 
 @app.route('/team')
 def my_team():
-	if 'user' not in session:
-		return redirect('/')
+	""" si l'id de la team est donnee, on montre cette team, avec un acces en edition si c'est
+	la team de user. Sinon, affiche la team de user avec edtiion """
 	user_id = getters.user(session)
 	with Cursor() as cursor:
-		teammate = TeamOf(cursor, user_id)
-		team_id = int(request.args['team'] if 'team' in request.args else teammate.team_id)
+
+		team_id = -1
 		try:
+			team_id, is_my_team = get_team_id(cursor, user_id, request.args)
 			team = TeamModelFromId(cursor, team_id)
 		except NoTeamError:
-			return redirect('/team/list?select=0')
-		teammates = UsersFromTeam(cursor, team.team_id)
-		objs = sorted(ObjectivesModel(cursor).objectives, key=lambda obj: obj.points)
+			# permet de choisir une team si user n'en a pas
+			return redirect('/team/list?select={}'.format(int(team_id == -1)))
+
+		teammates = UsersFromTeam(cursor, team_id)
+		objs = ObjectivesModel(cursor).to_sorted_list()
 		pictures = PicturesOfTeamModel(cursor, team.team_id)
-		edit = 'team' not in request.args or int(request.args['team']) == teammate.team_id
-	return render_template('team_page.html', edit=edit, team=team, teammates=teammates.users, objectives=objs, pictures=pictures.pictures)
+
+	return render_template('team_page.html', edit=is_my_team, team=team,\
+		teammates=teammates.users, objectives=objs, pictures=pictures.pictures)
+
+def get_team_id(cursor, user_id, args):
+	""" essaye de trouver l'id de la team """
+	try:
+		team_of_user = TeamOf(cursor, user_id)
+		team_id_of_user = team_of_user.team_id
+	except NoTeamError:
+		team_id_of_user = -1
+	if 'team' in args:
+		return int(args['team']), team_id_of_user == int(args['team'])
+	return TeamOf(cursor, user_id).team_id, True
 
 @app.route('/team/new')
 def new_team():
-	return render_template('new_team.html', colors=colors.Colors().colors)
+	""" sert la page de creation d'equipe """
+	return render_template('new_team.html', colors=colors.Colors())
 
 @app.route('/team/new/go')
 def new_team_go():
@@ -73,8 +89,6 @@ def new_team_go():
 
 @app.route('/team/list')
 def user_page():
-	if 'user' not in session:
-		return redirect('/')
 	user_id = getters.user(session)
 	with Cursor() as cursor:
 		user = UserModelName(cursor, user_id)
@@ -247,10 +261,10 @@ def handle_no_user_error(_):
 	""" redirige le client vers la creation d'user si user nest pas defini """
 	return redirect('/')
 
-@app.errorhandler(NoTeamError)
-def handle_no_team_error(_):
-	""" redirige le client vers la selection d'equipe si une erreur survient """
-	return redirect('/team/list?select=1')
+# @app.errorhandler(NoTeamError)
+# def handle_no_team_error(_):
+# 	""" redirige le client vers la selection d'equipe si une erreur survient """
+# 	return redirect('/team/list?select=1')
 
 if __name__ == '__main__':
 	app.run('0.0.0.0')
