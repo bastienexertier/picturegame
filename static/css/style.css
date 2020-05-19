@@ -148,3 +148,7 @@ div.element span {
 	margin: 0px 3px;
 	border-radius: 3px;
 }
+
+label {
+	cursor: pointer;
+}

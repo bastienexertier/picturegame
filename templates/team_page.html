@@ -70,10 +70,12 @@
 					{% if obj.obj_id in pictures %}
 					<img class="obj-img" src="/picture/{{ pictures[obj.obj_id].filename }}">
 					{% elif edit %}
-					<form action="/team/picture/add" method=post enctype=multipart/form-data>
+					<form action="/team/picture/add" method=post enctype=multipart/form-data class="text-center">
 						<input type="hidden" name="obj_id" value="{{ obj.obj_id }}">
-						<input type="file" name="file" accept="image/*" onchange="this.form.submit()">
-						<!-- <button class="offset-5 col-2" type="submit">add</button> -->
+						<input id="file-{{ obj.obj_id }}" type="file" name="file" accept="image/*" onchange="this.form.submit()" hidden>
+						<label for="file-{{ obj.obj_id }}">
+							<h1>&#x1F4F8;</h1>
+						</label>
 					</form>
 					{% else %}
 						<h1 class="text-center">&#x1F622;</h1>
