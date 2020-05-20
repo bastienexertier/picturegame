@@ -41,7 +41,9 @@ class RemoveUser(Vue):
 		self.user_id = user_id
 
 	def _check(self, cursor):
-		return bool(cursor.get_one(req.user(), (self.user_id,)))
+		user_exists = bool(cursor.get_one(req.user(), (self.user_id,)))
+		cursor.add_msg_if_false(user_exists, 'this user doesnt exist and cant be removed')
+		return user_exists
 
 	def _send_db(self, cursor):
 		cursor.add(req.delete_user(), (self.user_id,))

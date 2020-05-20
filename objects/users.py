@@ -20,6 +20,10 @@ class UsersModel(Model):
 		""" retourne la liste des users triee par nom """
 		return sorted(self.users, key=lambda user: user.name)
 
+	def nb_of_players(self):
+		""" returns the number of players """
+		return len(self.users)
+
 class AllUsers(UsersModel):
 	""" une classe contenant la liste de tous les joueurs """
 	def __init__(self, cursor):

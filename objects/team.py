@@ -154,20 +154,26 @@ class TeamLeave(Vue):
 	""" represente un user qui quitte son equipe, l'equipe est detruite si vide """
 	def __init__(self, user_id):
 		self.user_id = user_id
-		self.team_id = None
+		self.team = None
 
 	def _check(self, cursor):
 		""" verifie que l'utilisateur a bien une tea, qu'il peut leave """
-		team = cursor.get_one(req.team_of_user(), (self.user_id,))
-		if not team:
+		try:
+			self.team = TeamOf(cursor, self.user_id)
+
+			nb_of_teammates = UsersFromTeam(cursor, self.team.team_id).nb_of_players()
+			is_owner = self.team.is_owned_by(self.user_id)
+			can_leave = not (is_owner and (nb_of_teammates > 1))
+
+			cursor.add_msg_if_false(can_leave, 'user is owner of team and cant leave')
+			return can_leave
+		except NoTeamError:
 			cursor.add_msg('user doesnt have a team to leave')
 			return False
-		self.team_id = cursor.get_one(req.team_of_user(), (self.user_id,))['team_id']
-		return bool(self.team_id)
 
 	def _send_db(self, cursor):
 		cursor.add(req.leave_team(), (self.user_id,))
-		RemoveTeamIfEmpty(self.team_id).send_db(cursor)
+		RemoveTeamIfEmpty(self.team.team_id).send_db(cursor)
 
 class RemoveTeamIfEmpty(Vue):
 	""" suppression de l'equipe si elle est vide """

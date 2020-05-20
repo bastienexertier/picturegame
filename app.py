@@ -121,6 +121,7 @@ def my_team():
 			# permet de choisir une team si user n'en a pas
 			return redirect('/team/list?select={}'.format(int(team_id == -1)))
 
+		msg = request.args.get('msg', None)
 		teammates = UsersFromTeam(cursor, team_id)
 		objs = ObjectivesModel(cursor).to_sorted_list()
 		pictures = PicturesOfTeamModel(cursor, team.team_id)
@@ -129,7 +130,7 @@ def my_team():
 
 	return render_template('team_page.html', edit=is_my_team, team=team,\
 		teammates=teammates.users, objectives=objs, pictures=pictures.pictures, \
-		qrs=all_qrs, team_qrs=team_qrs, user_id=user_id)
+		qrs=all_qrs, team_qrs=team_qrs, user_id=user_id, msg=msg)
 
 def get_team_id(cursor, user_id, args):
 	""" essaye de trouver l'id de la team """
@@ -144,10 +145,12 @@ def get_team_id(cursor, user_id, args):
 
 @app.route('/team/leave')
 def team_leave():
+	""" un utilisateur qui quitte son equipe """
 	user_id = getters.user(session)
 	with Cursor() as cursor:
-		TeamLeave(user_id).send_db(cursor)
-	return redirect('/home')
+		success = TeamLeave(user_id).send_db(cursor)
+	msg = "You can't leave your team if you're the owner."
+	return redirect('/home') if success else redirect('/team?msg={}'.format(msg))
 
 @app.route('/team/picture')
 def picture():
