@@ -92,8 +92,19 @@ class PicturesWithStatus(PicturesModel):
 		super().__init__(cursor, self._load_pictures(cursor, load_req, (status,)))
 
 class DeletePictureVue(Picture, Vue):
+	""" la suppression d'une image par l'equipe """
+	def __init__(self, team, objective_id, user_id):
+		super().__init__(team.team_id, objective_id)
+		self.user_id = user_id
+		self.team = team
+
 	def _check(self, cursor):
-		return self.is_uploaded(cursor)
+		""" verifie que user soit bien le proprio de l'equipe """
+		is_owner = self.team.owner == self.user_id
+		is_uploaded = self.is_uploaded(cursor)
+		cursor.add_msg_if_false(is_owner, 'user is not the owner of the team')
+		cursor.add_msg_if_false(is_uploaded, 'this picture is not uploaded')
+		return is_uploaded and is_owner
 
 	def _send_db(self, cursor):
 		cursor.add(req.delete_picture(), (self.team_id, self.objective_id))

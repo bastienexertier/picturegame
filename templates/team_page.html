@@ -41,7 +41,7 @@
 					<hr>
 					<div class="box-list">
 						{% for teammate in teammates %}
-							<span>{{ teammate.name }}</span>
+							<span>{% if teammate.user_id == team.owner %}&#x1F451; {% endif %}{{ teammate.name }}</span>
 						{% endfor %}
 					</div>
 				</div>
@@ -92,7 +92,15 @@
 						<h5 class="obj-points">&#x1F3C6;{{ obj.points }}</h5>
 						{% if obj.obj_id in pictures and edit %}
 							<h5 class="obj-points">
-								<a href="/team/picture/delete?obj_id={{ obj.obj_id }}" onclick="return delete_picture()">&#x274C;</a>
+								{% if user_id == team.owner %}
+								<a href="/team/picture/delete?obj_id={{ obj.obj_id }}" onclick="return delete_picture()">
+									&#x274C;
+								</a>
+								{% else %}
+								<a onclick="return not_the_owner()">
+									&#x274C;
+								</a>
+								{% endif %}
 							</h5>
 						{% endif %}
 					</div>
@@ -127,7 +135,10 @@
 	{% include 'footers.html' %}
 	<script type="text/javascript">
 		function delete_picture() {
-			return confirm("Are you sure you want to delete this picture ?");
+			return confirm("Are you sure you want to delete this picture?");
+		}
+		function not_the_owner() {
+			return alert("Only the owner of the team can delete a picture");
 		}
 	</script>
 </body>

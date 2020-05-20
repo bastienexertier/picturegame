@@ -12,14 +12,15 @@ class NoTeamError(Exception):
 
 class Team:
 	""" une equipe basique """
-	def __init__(self, name, color):
+	def __init__(self, name, color, owner):
 		self.name = name
 		self.color = colors.Color(color)
+		self.owner = owner
 
 class TeamModel(Team, Model):
 	""" une equipe venant du model """
-	def __init__(self, cursor, team_id, team_name, color, points):
-		super().__init__(team_name, color)
+	def __init__(self, cursor, team_id, team_name, color, owner, points):
+		super().__init__(team_name, color, owner)
 		self.cursor = cursor
 		self.team_id = team_id
 		self.points = points
@@ -39,16 +40,16 @@ class TeamModel(Team, Model):
 class TeamModelFromId(TeamModel):
 	""" une equipe a partir d'une id de team """
 	def __init__(self, cursor, team_id):
-		name, color = TeamModelFromId.__load(cursor, team_id)
+		name, color, owner = TeamModelFromId.__load(cursor, team_id)
 		points = TeamModel._load_points(cursor, team_id)
-		super().__init__(cursor, team_id, name, color, points)
+		super().__init__(cursor, team_id, name, color, owner, points)
 
 	@staticmethod
 	def __load(cursor, team_id):
 		req_res = cursor.get_one(req.team(), (team_id,))
 		if req_res is None:
 			raise NoTeamError('team {} does not exists'.format(team_id))
-		return req_res['name'], req_res['color']
+		return req_res['name'], req_res['color'], req_res['owner_id']
 
 class TeamMedalModel(TeamModel):
 	""" une Team avec un attribut medaille, connait deja son nombre de points """
@@ -78,10 +79,8 @@ class TeamVue(Team, Vue):
 	def _check(self, cursor):
 		same_name = cursor.get(req.team_with_name(), (self.name,))
 		user_has_team = cursor.get(req.team_id_of_user(), (self.user_id,))
-		if same_name:
-			cursor.add_msg('same name')
-		if user_has_team:
-			cursor.add_msg('user has already a team')
+		cursor.add_msg_if_true(same_name, 'same name')
+		cursor.add_msg_if_true(user_has_team, 'user has already a team')
 		return not same_name and not user_has_team
 
 	def _send_db(self, cursor):
@@ -117,7 +116,7 @@ class TeamsModel(Model):
 		for team in cursor.get(req.all_teams()):
 			team_id = team['team_id']
 			score = points.pop(team_id, 0)
-			res.append(TeamMedalModel(cursor, team_id, team['name'], team['color'], score))
+			res.append(TeamMedalModel(cursor, team_id, team['name'], team['color'], team['owner_id'], score))
 		return res
 
 	@staticmethod
