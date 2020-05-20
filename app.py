@@ -149,8 +149,8 @@ def team_leave():
 
 @app.route('/team/picture')
 def picture():
-	obj_id = request.args['obj_id']
-	team_id = request.args['team']
+	obj_id = int(request.args['obj_id'])
+	team_id = int(request.args['team'])
 	with Cursor() as cursor:
 		pic = PictureOfTeam(cursor, team_id, obj_id)
 		if pic.is_uploaded(cursor):
@@ -174,7 +174,7 @@ def add_picture():
 def delete_picture():
 	""" supprime l'image si user est l'owner de son equipe """
 	user_id = getters.user(session)
-	obj_id = request.args['obj_id']
+	obj_id = int(request.args['obj_id'])
 	with Cursor() as cursor:
 		team = TeamOf(cursor, user_id)
 		if team.is_owned_by(user_id):
@@ -185,7 +185,7 @@ def delete_picture():
 def change_owner():
 	""" change l'owner de lequipe """
 	user_id = getters.user(session)
-	new_owner = request.args['user']
+	new_owner = int(request.args['user'])
 	with Cursor() as cursor:
 		team = TeamOf(cursor, user_id)
 		if team.is_owned_by(user_id):
