@@ -17,7 +17,7 @@ from objects.team import TeamsModel, TeamOf, TeamVue, TeamLeave, TeamModelFromId
 
 from objects.objective import ObjectivesModel, ObjectiveVue, DeleteObjectiveVue, ObjectiveModelFromId
 
-from objects.picture import PictureOfTeam, PictureVue, DeletePictureVue, AcceptPictureVue
+from objects.picture import PictureOfTeam, PictureVue, DeletePictureVue, DeletePictureIfOwner, AcceptPictureVue
 from objects.pictures import PicturesOfTeamModel, AllPicturesModel, PicturesWithStatus
 
 from objects.qrcode import QRCodeVue, QRCodeFromKey, QRDoesntExistError, FoundQRCodeVue, RemoveQRCode
@@ -173,7 +173,7 @@ def delete_picture():
 	obj_id = request.args['obj_id']
 	with Cursor() as cursor:
 		team = TeamOf(cursor, user_id)
-		DeletePictureVue(team, obj_id, user_id).send_db(cursor)
+		DeletePictureIfOwner(team, obj_id, user_id).send_db(cursor)
 	return redirect('/team')
 
 @app.route('/objectives/new')
@@ -212,10 +212,12 @@ def found_qrcode(qr_key):
 		team = TeamOf(cursor, user_id)
 		try:
 			qrcode = QRCodeFromKey(cursor, qr_key)
-			firsttime = FoundQRCodeVue(team.team_id, qrcode.qr_id).send_db(cursor)
-			return render_template('find_qr.html', team=team, exists=True, already=(not firsttime), qrcode=qrcode)
+			already = FoundQRCodeVue(team.team_id, qrcode.qr_id).send_db(cursor)
+			return render_template('find_qr.html', team=team, exists=True, already=already, qrcode=qrcode)
 		except QRDoesntExistError:
 			return render_template('find_qr.html', team=team, exists=False)
+
+# =================================== ADMIN ===================================
 
 @app.route('/admin')
 @basic_auth.required
@@ -227,7 +229,8 @@ def admin():
 		users = AllUsers(cursor)
 		invalid_pictures = PicturesWithStatus(cursor, 0)
 		qrcodes = AllQRCodesModel(cursor)
-	return render_template('admin.html', objectives=objs, teams=teams, users=users, pictures=invalid_pictures.pictures, qrcodes=qrcodes.qrcodes)
+	return render_template('admin.html', objectives=objs, teams=teams,\
+		users=users, pictures=invalid_pictures.pictures, qrcodes=qrcodes.qrcodes)
 
 @app.route('/admin/user/delete')
 @basic_auth.required
@@ -283,15 +286,17 @@ def admin_qrcode_img(qr_key):
 	""" retourne le png du qrcode demande """
 	return send_file(join('qrcodes', qr_key + '.png'))
 
+# ============================ ERROR HANDLERS =================================
+
 @app.errorhandler(getters.NoUserError)
 def handle_no_user_error(_):
 	""" redirige le client vers la creation d'user si user nest pas defini """
 	return redirect('/')
 
-# @app.errorhandler(NoTeamError)
-# def handle_no_team_error(_):
-# 	""" redirige le client vers la selection d'equipe si une erreur survient """
-# 	return redirect('/team/list?select=1')
+@app.errorhandler(NoTeamError)
+def handle_no_team_error(_):
+	""" redirige le client vers la selection d'equipe si une erreur survient """
+	return redirect('/team/list?select=1')
 
 if __name__ == '__main__':
 	app.run('0.0.0.0')

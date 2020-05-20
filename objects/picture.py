@@ -59,6 +59,16 @@ class PictureOfTeam(PictureModel):
 		return pic['filename'], pic['status']
 
 class DeletePictureVue(Picture, Vue):
+	""" suppression d'une picture """
+	def _check(self, cursor):
+		is_uploaded = self.is_uploaded(cursor)
+		cursor.add_msg_if_false(is_uploaded, 'this picture is not uploaded')
+		return is_uploaded
+
+	def _send_db(self, cursor):
+		cursor.add(req.delete_picture(), (self.team_id, self.objective_id))
+
+class DeletePictureIfOwner(DeletePictureVue):
 	""" la suppression d'une image par l'equipe """
 	def __init__(self, team, objective_id, user_id):
 		super().__init__(team.team_id, objective_id)
@@ -68,13 +78,9 @@ class DeletePictureVue(Picture, Vue):
 	def _check(self, cursor):
 		""" verifie que user soit bien le proprio de l'equipe """
 		is_owner = self.team.owner == self.user_id
-		is_uploaded = self.is_uploaded(cursor)
+		is_uploaded = super()._check(cursor)
 		cursor.add_msg_if_false(is_owner, 'user is not the owner of the team')
-		cursor.add_msg_if_false(is_uploaded, 'this picture is not uploaded')
 		return is_uploaded and is_owner
-
-	def _send_db(self, cursor):
-		cursor.add(req.delete_picture(), (self.team_id, self.objective_id))
 
 class AcceptPictureVue(Picture, Vue):
 	""" acceptation d'une image depuis la vue (par un admin) """
