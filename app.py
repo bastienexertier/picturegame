@@ -46,6 +46,66 @@ def new_user():
 		session['user'] = max(cursor.cursor.lastrowid, 1)
 	return redirect('/home')
 
+@app.route('/home')
+def home():
+	""" """
+	user_id = getters.user(session)
+	with Cursor() as cursor:
+		user = UserModelName(cursor, user_id)
+		teams = TeamsModel(cursor)
+		users = AllUsers(cursor)
+		try:
+			my_team = TeamOf(cursor, user_id)
+		except NoTeamError:
+			my_team = None
+	return render_template('home_page.html', teams=teams, my_team=my_team, users=users, me=user)
+
+# ================================= JOIN TEAM =================================
+
+@app.route('/home/team/list')
+def user_page():
+	user_id = getters.user(session)
+	with Cursor() as cursor:
+		user = UserModelName(cursor, user_id)
+		try:
+			team_id = TeamOf(cursor, user_id).team_id
+		except NoTeamError:
+			team_id = -1
+		teams = TeamsModel(cursor)
+		select = int(request.args['select'])
+		return render_template('team_list.html', select=select, user=user, teams=teams.teams, team_id=team_id)
+
+@app.route('/home/team/join')
+def team_join():
+	# si l'user est supprime et qu'il essaye de rejoindre une team,
+	# redirection vers team/list au lieu de user create
+	if 'team' not in request.args:
+		return redirect('/home/team/list')
+	user_id = getters.user(session)
+	team_id = int(request.args['team'])
+	with Cursor() as cursor:
+		TeammateVue(user_id, team_id, 0).send_db(cursor)
+	return redirect('/team')
+
+@app.route('/home/team/new')
+def new_team():
+	""" sert la page de creation d'equipe """
+	return render_template('new_team.html', colors=colors.Colors())
+
+@app.route('/home/team/new/go')
+def new_team_go():
+	""" ajoute la team dans le model """
+	if 'teamname' not in request.args:
+		return redirect('/home/team/new')
+	team_name = request.args['teamname'].capitalize()
+	user_id = getters.user(session)
+	color = int(request.args['color'])
+	with Cursor() as cursor:
+		TeamVue(user_id, team_name, color).send_db(cursor)
+	return redirect('/team')
+
+# =================================== TEAM ====================================
+
 @app.route('/team')
 def my_team():
 	""" si l'id de la team est donnee, on montre cette team, avec un acces en edition si c'est
@@ -81,61 +141,6 @@ def get_team_id(cursor, user_id, args):
 	if 'team' in args:
 		return int(args['team']), team_id_of_user == int(args['team'])
 	return TeamOf(cursor, user_id).team_id, True
-
-@app.route('/home')
-def home():
-	""" """
-	user_id = getters.user(session)
-	with Cursor() as cursor:
-		user = UserModelName(cursor, user_id)
-		teams = TeamsModel(cursor)
-		users = AllUsers(cursor)
-		try:
-			my_team = TeamOf(cursor, user_id)
-		except NoTeamError:
-			my_team = None
-	return render_template('home_page.html', teams=teams, my_team=my_team, users=users, me=user)
-
-@app.route('/team/new')
-def new_team():
-	""" sert la page de creation d'equipe """
-	return render_template('new_team.html', colors=colors.Colors())
-
-@app.route('/team/new/go')
-def new_team_go():
-	if 'teamname' not in request.args:
-		return redirect('/team/new')
-	team_name = request.args['teamname'].capitalize()
-	user_id = getters.user(session)
-	color = int(request.args['color'])
-	with Cursor() as cursor:
-		TeamVue(user_id, team_name, color).send_db(cursor)
-	return redirect('/team')
-
-@app.route('/team/list')
-def user_page():
-	user_id = getters.user(session)
-	with Cursor() as cursor:
-		user = UserModelName(cursor, user_id)
-		try:
-			team_id = TeamOf(cursor, user_id).team_id
-		except NoTeamError:
-			team_id = -1
-		teams = TeamsModel(cursor)
-		select = int(request.args['select'])
-		return render_template('team_list.html', select=select, user=user, teams=teams.teams, team_id=team_id)
-
-@app.route('/team/join')
-def team_join():
-	# si l'user est supprime et qu'il essaye de rejoindre une team,
-	# redirection vers team/list au lieu de user create
-	if 'team' not in request.args:
-		return redirect('/team/select')
-	user_id = getters.user(session)
-	team_id = int(request.args['team'])
-	with Cursor() as cursor:
-		TeammateVue(user_id, team_id, 0).send_db(cursor)
-	return redirect('/team')
 
 @app.route('/team/leave')
 def team_leave():
@@ -175,6 +180,8 @@ def delete_picture():
 		team = TeamOf(cursor, user_id)
 		DeletePictureIfOwner(team, obj_id, user_id).send_db(cursor)
 	return redirect('/team')
+
+# ================================ OBJECTIVES =================================
 
 @app.route('/objectives/new')
 def new_obj():
