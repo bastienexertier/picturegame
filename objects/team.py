@@ -77,15 +77,15 @@ class TeamVue(Team, Vue):
 
 	def _check(self, cursor):
 		same_name = cursor.get(req.team_with_name(), (self.name,))
-		user_team = cursor.get(req.team_id_of_user(), (self.user_id,))
+		user_has_team = cursor.get(req.team_id_of_user(), (self.user_id,))
 		if same_name:
 			cursor.add_msg('same name')
-		if user_team:
+		if user_has_team:
 			cursor.add_msg('user has already a team')
-		return not same_name and not user_team
+		return not same_name and not user_has_team
 
 	def _send_db(self, cursor):
-		team_id = cursor.add(req.new_team(), (self.name, self.color.color_id))
+		team_id = cursor.add(req.new_team(), (self.name, self.color.color_id, self.user_id))
 		TeammateVue(self.user_id, team_id, 5).send_db(cursor)
 
 class TeamsModel(Model):
