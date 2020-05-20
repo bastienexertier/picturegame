@@ -31,8 +31,8 @@ basic_auth = BasicAuth(app)
 
 @app.route('/')
 def main_page():
-	# if 'user' in session:
-	# 	return redirect('/team/list?select=1')
+	if 'user' in session:
+		return redirect('/home')
 	return render_template('main_page.html')
 
 @app.route('/newuser')
@@ -67,13 +67,8 @@ def user_page():
 	user_id = getters.user(session)
 	with Cursor() as cursor:
 		user = UserModelName(cursor, user_id)
-		try:
-			team_id = TeamOf(cursor, user_id).team_id
-		except NoTeamError:
-			team_id = -1
 		teams = TeamsModel(cursor)
-		select = int(request.args['select'])
-		return render_template('team_list.html', select=select, user=user, teams=teams.teams, team_id=team_id)
+		return render_template('team_list.html', user=user, teams=teams.teams)
 
 @app.route('/home/team/join')
 def team_join():
@@ -119,7 +114,7 @@ def my_team():
 			team = TeamModelFromId(cursor, team_id)
 		except NoTeamError:
 			# permet de choisir une team si user n'en a pas
-			return redirect('/team/list?select={}'.format(int(team_id == -1)))
+			return redirect('/team/list' if team_id == -1 else '/home')
 
 		msg = request.args.get('msg', None)
 		teammates = UsersFromTeam(cursor, team_id)
@@ -320,7 +315,7 @@ def handle_no_user_error(_):
 @app.errorhandler(NoTeamError)
 def handle_no_team_error(_):
 	""" redirige le client vers la selection d'equipe si une erreur survient """
-	return redirect('/team/list?select=1')
+	return redirect('/team/list')
 
 if __name__ == '__main__':
 	app.run('0.0.0.0')

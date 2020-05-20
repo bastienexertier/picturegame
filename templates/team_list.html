@@ -7,16 +7,11 @@
 <body>
 	<div class="jumbotron">
 		<div class="row text-center">
-			{% if select %}
-				<h2 class="col-12">Join a team</h2>
-			{% else %}
-				<h2 class="col-12">Check a team</h2>
-			{% endif %}
+			<h2 class="col-12">Join a team</h2>
 		</div>
 	</div>
 	<div class="container">
 		<div class="row">
-			{% if select %}
 			<div class="col-12 col-md-6 col-xl-4 element-container text-center">
 				<div class="element">
 					<h4>
@@ -24,31 +19,24 @@
 					</h4>
 				</div>
 			</div>
-			{% endif %}
+
+
 			{% for t in teams %}
 				<div class="col-12 col-md-6 col-xl-4 element-container">
 					<div class="element">
-						<h3>&#x1F530; {{ t.name }}</h3>
-						<hr>
-						<div class="obj-row text-center">
-							<h4>
+						<div class="row">
+							<h5 class="col-2 line-left">
 								{% if t.medal == 1 %}&#x1F947;
 								{% elif t.medal == 2 %}&#x1F948;
 								{% elif t.medal == 3 %}&#x1F949;
 								{% else %}&#x1F44D;{% endif %}
-							</h4>
-							<h5>
-								{% if team_id and team_id == t.team_id %}&#x1F970;{% endif %}
-								{% if select %}
-								<a href="join?team={{ t.team_id }}">Join</a>
-								{% else %}
-								<a href="/team?team={{ t.team_id }}">Check</a>
-								{% endif %}
-								{% if team_id and team_id == t.team_id %}&#x1F970;{% endif %}
 							</h5>
-							<h4>
-								{{ t.points }}&#x1F3C6;
-							</h4>
+							<h5 class="col-7 line-middle">
+								<a href="join?team={{ t.team_id }}" onclick="return join_team()">{{ t.name }}</a>
+							</h5>
+							<h5 class="col-3 line-right">
+								<span class="line-right">{{ t.points }}&#x1F3C6;</span>
+							</h5>
 						</div>
 					</div>
 				</div>
@@ -56,5 +44,10 @@
 		</div>
 	</div>
 	{% include 'footers.html' %}
+	<script type="text/javascript">
+		function join_team() {
+			return confirm('Join this team?');
+		}
+	</script>
 </body>
 </html>
