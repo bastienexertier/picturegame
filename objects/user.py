@@ -67,5 +67,5 @@ class UsersFromTeam(UsersModel):
 	def __load(self):
 		res = []
 		for user in self.cursor.get(req.users_of_team(), (self.team_id,)):
-			res.append(User(user['name']))
+			res.append(UserModel(user['user_id'], user['name']))
 		return res

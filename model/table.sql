@@ -17,7 +17,9 @@ CREATE TABLE users(
 CREATE TABLE teams(
 	team_id INTEGER NOT NULL PRIMARY KEY,
 	color INTEGER NOT NULL,
-	name TEXT NOT NULL
+	name TEXT NOT NULL,
+	owner_id INTEGER NOT NULL,
+	FOREIGN KEY (owner_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 CREATE TABLE team_users(

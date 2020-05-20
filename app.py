@@ -61,7 +61,7 @@ def my_team():
 
 	return render_template('team_page.html', edit=is_my_team, team=team,\
 		teammates=teammates.users, objectives=objs, pictures=pictures.pictures, \
-		qrs=all_qrs, team_qrs=team_qrs)
+		qrs=all_qrs, team_qrs=team_qrs, user_id=user_id)
 
 def get_team_id(cursor, user_id, args):
 	""" essaye de trouver l'id de la team """
@@ -119,6 +119,8 @@ def user_page():
 
 @app.route('/team/join')
 def team_join():
+	# si l'user est supprime et qu'il essaye de rejoindre une team,
+	# redirection vers team/list au lieu de user create
 	if 'team' not in request.args:
 		return redirect('/team/select')
 	user_id = getters.user(session)
@@ -162,8 +164,8 @@ def delete_picture():
 	user_id = getters.user(session)
 	obj_id = request.args['obj_id']
 	with Cursor() as cursor:
-		team_id = TeamOf(cursor, user_id).team_id
-		DeletePictureVue(team_id, obj_id).send_db(cursor)
+		team = TeamOf(cursor, user_id)
+		DeletePictureVue(team, obj_id, user_id).send_db(cursor)
 	return redirect('/team')
 
 @app.route('/objectives/new')

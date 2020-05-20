@@ -33,7 +33,7 @@ def users_of_team():
 	return """ SELECT u.user_id, u.name FROM users as u, teams as t, team_users as tu WHERE t.team_id = ? AND tu.team_id = t.team_id AND tu.user_id = u.user_id """
 
 def new_team():
-	return """ INSERT INTO teams(name, color) VALUES (?, ?) """
+	return """ INSERT INTO teams(name, color, owner_id) VALUES (?, ?, ?) """
 
 def delete_team():
 	return """ DELETE FROM teams WHERE team_id = ? """

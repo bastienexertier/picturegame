@@ -47,6 +47,14 @@ class Cursor:
 	def add_msg(self, msg):
 		self.msg.append(msg)
 
+	def add_msg_if_true(self, flag, msg):
+		if flag:
+			self.msg.append(msg)
+
+	def add_msg_if_false(self, flag, msg):
+		if not flag:
+			self.msg.append(msg)
+
 	def __exit__(self, exc_type, exc_value, traceback):
 		if self.msg and self.show_msg:
 			print('\n'.join(self.msg))
