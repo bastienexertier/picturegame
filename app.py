@@ -1,19 +1,27 @@
-
+""" fichier controlleur de l'appli """
 
 from os.path import join
-from json import dumps
 from flask import Flask, render_template, request, redirect, session, send_file
 from flask_basicauth import BasicAuth
 
 import colors
 import getters
 from model.dbi import Cursor
-from objects.user import UserVue, UserModelName, AllUsers, RemoveUser, UsersFromTeam
+
+from objects.user import UserVue, UserModelName, RemoveUser
+from objects.users import AllUsers, UsersFromTeam
+
 from objects.teammate import TeammateVue
+
 from objects.team import TeamsModel, TeamOf, TeamVue, TeamLeave, TeamModelFromId, NoTeamError
+
 from objects.objective import ObjectivesModel, ObjectiveVue, DeleteObjectiveVue, ObjectiveModelFromId
-from objects.picture import PictureOfTeam, PictureVue, PicturesOfTeamModel, DeletePictureVue, AcceptPictureVue, AllPicturesModel, PicturesWithStatus
-from objects.qrcode import QRCodeVue, AllQRCodesModel, QRCodeFromKey, QRDoesntExistError, FoundQRCodeVue, RemoveQRCode, QRCodesOfTeam
+
+from objects.picture import PictureOfTeam, PictureVue, DeletePictureVue, AcceptPictureVue
+from objects.pictures import PicturesOfTeamModel, AllPicturesModel, PicturesWithStatus
+
+from objects.qrcode import QRCodeVue, QRCodeFromKey, QRDoesntExistError, FoundQRCodeVue, RemoveQRCode
+from objects.qrcodes import AllQRCodesModel, QRCodesOfTeam
 
 app = Flask(__name__)
 app.secret_key = 'turbo prout prout'

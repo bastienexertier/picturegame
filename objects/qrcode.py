@@ -1,13 +1,17 @@
 """ un module gerant les qr codes """
 
+# pylint: disable=too-few-public-methods
+
 from random import choice
 from string import ascii_lowercase
 from os import remove
-from os.path import isfile, join
+from os.path import join
 from subprocess import check_output
 
 from objects.jsonable import Vue, Model
 import model.requests as req
+
+TARGET_BASE_URL = 'http://192.168.0.5:5000'
 
 class QRDoesntExistError(Exception):
 	""" une exception si le qr n'existe pas """
@@ -20,10 +24,14 @@ class QRCode:
 
 class QRCodeVue(QRCode, Vue):
 	""" un qr code venant de la vue """
-	def __create_key(self):
+	@staticmethod
+	def __create_key(cursor):
+		""" genere une cle qui n'est pas deja utilisee """
+		all_qrs = cursor.get(req.all_qrcodes())
+		all_keys = map(lambda qr: qr['key'], all_qrs)
 		while True:
 			key = ''.join(choice(ascii_lowercase) for i in range(10))
-			if not isfile(join('qrcodes', key + '.png')):
+			if key not in all_keys:
 				return key
 
 	def _check(self, cursor):
@@ -31,9 +39,9 @@ class QRCodeVue(QRCode, Vue):
 		return self.points.isdigit() and len(self.description) > 3
 
 	def _send_db(self, cursor):
-		key = self.__create_key()
+		key = QRCodeVue.__create_key(cursor)
 		filename = key + '.png'
-		target_url = 'http://192.168.0.5:5000/qrcode/{}'.format(key)
+		target_url = '{}/qrcode/{}'.format(TARGET_BASE_URL, key)
 		create_qrcode(target_url, join('qrcodes', filename))
 		cursor.add(req.new_qr(), (key, self.points, self.description))
 
@@ -43,10 +51,10 @@ class RemoveQRCode(Vue):
 		self.key = key
 
 	def _check(self, cursor):
-		return True
+		qrcode = QRCodeFromKey(cursor, self.key)
+		return bool(qrcode)
 
 	def _send_db(self, cursor):
-		qrcode = QRCodeFromKey(cursor, self.key)
 		cursor.add(req.delete_qr(), (self.key,))
 		remove(join('qrcodes', self.key + '.png'))
 
@@ -66,42 +74,10 @@ class QRCodeFromKey(QRCodeModel):
 	@staticmethod
 	def __load(cursor, key):
 		""" charge le qrcode a partir de la cle """
-		qr = cursor.get_one(req.qr_from_key(), (key,))
-		if qr is None:
+		qrcode = cursor.get_one(req.qr_from_key(), (key,))
+		if qrcode is None:
 			raise QRDoesntExistError(key)
-		return qr['qr_id'], qr['points'], qr['description']
-
-class QRCodesModel(Model):
-	""" une liste de qr codes venant du model """
-	def __init__(self, cursor):
-		self.qrcodes = self._load_qrcodes(cursor)
-
-	def _load_qrcodes(self, cursor):
-		raise NotImplementedError()
-
-	def to_dict(self):
-		""" retourne les qrs sous forme de dict(qr_id) = qr """
-		return {qr.qr_id: qr for qr in self.qrcodes}
-
-class AllQRCodesModel(QRCodesModel):
-	""" tous les qrcodes de la db """
-	def _load_qrcodes(self, cursor):
-		res = []
-		for qrcode in cursor.get(req.all_qrcodes()):
-			res.append(QRCodeModel(qrcode['points'], qrcode['description'], qrcode['qr_id'], qrcode['key']))
-		return res
-
-class QRCodesOfTeam(QRCodesModel):
-	""" tous les qr codes trouve par une equipe """
-	def __init__(self, cursor, team_id):
-		self.team_id = team_id
-		super().__init__(cursor)
-
-	def _load_qrcodes(self, cursor):
-		res = []
-		for qrcode in cursor.get(req.all_qr_found_by_team(), (self.team_id,)):
-			res.append(QRCodeModel(qrcode['points'], qrcode['description'], qrcode['qr_id'], qrcode['key']))
-		return res
+		return qrcode['qr_id'], qrcode['points'], qrcode['description']
 
 class FoundQRCodeVue(Vue):
 	""" object representant une equipe qui a trouve un qr """

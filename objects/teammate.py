@@ -1,9 +1,13 @@
+""" module gerant les teammates """
+
+# pylint: disable=too-few-public-methods
 
 from objects.jsonable import Vue, Model
 
 import model.requests as req
 
 class Teammate:
+	""" un squelette de teammate """
 	def __init__(self, user_id, team_id, status):
 		self.user_id = user_id
 		self.team_id = team_id
