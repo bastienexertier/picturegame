@@ -2,8 +2,8 @@
 
 import sqlite3 as sql
 
-DBNAME = 'model/test.db'
-SQLINIT = 'model/tables.sql'
+DBNAME = '/home/DigitalBananaDirector/picturegame/model/test.db'
+SQLINIT = '/home/DigitalBananaDirector/picturegame/model/tables.sql'
 
 def main():
 	""" drop toutes les tables et les recree """

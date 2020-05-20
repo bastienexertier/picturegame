@@ -94,6 +94,6 @@ class FoundQRCodeVue(Vue):
 
 def create_qrcode(data, filename):
 	""" cree et sauve un qrcode """
-	cmd = 'qr "{}" > {}'.format(data, filename)
+	cmd = 'qr "{}" > /home/DigitalBananaDirector/picturegame/{}'.format(data, filename)
 	# ne depend pas d'entree user donc shell=True est ok
 	return check_output(cmd, shell=True)
