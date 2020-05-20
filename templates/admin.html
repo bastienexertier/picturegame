@@ -108,7 +108,7 @@
 					<div class="row">
 						{% for user in sorted_users %}
 							<a class="col-2 text-center" href="/admin/user/delete?user={{ user.user_id }}" onclick="return delete_element('user', this);">&#x274C;</a>
-							<h5 class="col-10 line-middle ellipseable">
+							<h5 class="col-9 line-middle ellipseable">
 								{% if user.user_id in owners_dict %}
 									<a href="/team?team={{ owners_dict[user.user_id].team_id }}">
 										&#x1F451;

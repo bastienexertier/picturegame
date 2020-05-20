@@ -18,7 +18,6 @@
 			<div class="col-12 col-md-6 col-xl-4 element-container">
 				<div class="element">
 					<h3 class="theme-person"> Me</h3>
-					<hr>
 					<h5 class="italic text-center">{{ me.name }}</h5>
 				</div>
 			</div>
@@ -27,15 +26,14 @@
 				<div class="col-12 col-md-6 col-xl-4 element-container">
 					<div class="element">
 						<h3 class="theme-team"> My Team</h3>
-						<hr>
 						<div class="row">
-							<h5 class="col-2 line-left">
+<!-- 							<h5 class="col-2 line-left">
 								&#x1F4AA;
-							</h5>
-							<h5 class="col-6 line-middle ellipseable">
+							</h5> -->
+							<h5 class="col-9 ellipseable">
 								<a href="/team?team={{ my_team.team_id }}">{{ my_team.name }}</a>
 							</h5>
-							<h5 class="col-4 line-right">
+							<h5 class="col-3 line-right">
 								{{ my_team.points }}&#x1F3C6;
 							</h5>
 						</div>
@@ -45,11 +43,17 @@
 				<div class="col-12 col-md-6 col-xl-4 element-container">
 					<div class="element">
 						<h3>&#x1F530; Join a Team</h3>
-						<hr>
 						<h5 class="text-center"><a href="/home/team/list">Join</a></h5>
 					</div>
 				</div>
 			{% endif %}
+
+			<div class="col-12 col-md-6 col-xl-4 element-container">
+				<div class="element text-center">
+					<h3>&#x1F60D; Welcome &#x1F60D;</h3>
+					<h5 class="italic">I hope you will enjoy the game!</h5>
+				</div>
+			</div>
 
 			<hr class="col-12">
 

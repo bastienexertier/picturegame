@@ -69,17 +69,7 @@ img {
 	flex-shrink: 0;
 }
 
-
-.line-left {
-	word-break: keep-all;
-	text-align: center;
-}
-.line-middle {
-	padding: 0px;
-}
-.line-right {
-	text-align: right;
-	word-break: keep-all;
+word-break: keep-all;
 }
 
 .name-form > .row > * {
@@ -170,5 +160,16 @@ label {
 	white-space: nowrap;
 	overflow:hidden;
 	text-overflow: ellipsis;
-	padding-right: 20px;
+}
+
+.line-left {
+	word-break: keep-all;
+	text-align: center;
+}
+.line-middle {
+	padding: 0px;
+}
+.line-right {
+	text-align: right;
+	padding-left: 0px;
 }
