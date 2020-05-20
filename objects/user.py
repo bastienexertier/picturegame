@@ -54,6 +54,10 @@ class UsersModel(Model):
 	def __get_users(cursor):
 		return [UserModel(user['user_id'], user['name']) for user in cursor.get(req.users())]
 
+	def to_sorted(self):
+		""" retourne la liste des users triee par nom """
+		return sorted(self.users, key=lambda user: user.name)
+
 class UsersFromTeam(UsersModel):
 	def __init__(self, cursor, team_id):
 		self.cursor = cursor

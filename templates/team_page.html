@@ -105,18 +105,18 @@
 					<h3>Actions</h3>
 					<hr>
 					<div class="box-list">
+						<span>
+							<a href="/home" class="col-4">Home</a>
+						</span>
 						{% if edit %}
 						<span>
-							<a href="team/leave" class="col-4" onclick="return confirm('Are you sure?')">Leave Team</a>
+							<a href="/team/leave" class="col-4" onclick="return confirm('Are you sure?')">Leave Team</a>
 						</span>
 						{% else %}
 						<span>
 							<a href="/team" class="col-4">My team</a>
 						</span>
 						{% endif %}
-						<span>
-							<a href="/team/list?select=0" class="col-4">Other teams</a>
-						</span>
 					</div>
 				</div>
 			</div>

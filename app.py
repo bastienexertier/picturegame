@@ -36,7 +36,7 @@ def new_user():
 		if not user.send_db(cursor):
 			return redirect('/')
 		session['user'] = max(cursor.cursor.lastrowid, 1)
-	return redirect('/team/list?select=1')
+	return redirect('/home')
 
 @app.route('/team')
 def my_team():
@@ -74,6 +74,20 @@ def get_team_id(cursor, user_id, args):
 		return int(args['team']), team_id_of_user == int(args['team'])
 	return TeamOf(cursor, user_id).team_id, True
 
+@app.route('/home')
+def home():
+	""" """
+	user_id = getters.user(session)
+	with Cursor() as cursor:
+		user = UserModelName(cursor, user_id)
+		teams = TeamsModel(cursor)
+		users = UsersModel(cursor)
+		try:
+			my_team = TeamOf(cursor, user_id)
+		except NoTeamError:
+			my_team = None
+	return render_template('home_page.html', teams=teams, my_team=my_team, users=users, me=user)
+
 @app.route('/team/new')
 def new_team():
 	""" sert la page de creation d'equipe """
@@ -83,7 +97,7 @@ def new_team():
 def new_team_go():
 	if 'teamname' not in request.args:
 		return redirect('/team/new')
-	team_name = request.args['teamname']
+	team_name = request.args['teamname'].capitalize()
 	user_id = getters.user(session)
 	color = int(request.args['color'])
 	with Cursor() as cursor:
@@ -118,7 +132,7 @@ def team_leave():
 	user_id = getters.user(session)
 	with Cursor() as cursor:
 		TeamLeave(user_id).send_db(cursor)
-	return redirect('/team/list?select=1')
+	return redirect('/home')
 
 @app.route('/team/picture')
 def picture():
