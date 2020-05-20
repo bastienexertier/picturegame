@@ -19,6 +19,8 @@ class Cursor:
 		self.cursor = None
 		self.msg = []
 
+	# enter context
+
 	def __enter__(self):
 		self.conn = sql.connect(DBNAME)
 		if self.do_print:
@@ -28,6 +30,8 @@ class Cursor:
 		self.cursor = self.conn.cursor()
 		self.cursor.execute('PRAGMA foreign_keys = ON')
 		return self
+
+	# execute request
 
 	def get(self, request, args=()):
 		""" recupere toute les lignes correspondante a la requete """
@@ -44,16 +48,23 @@ class Cursor:
 		self.cursor.execute(request, args)
 		return self.cursor.lastrowid
 
+	# log messages
+
 	def add_msg(self, msg):
+		""" ajoute un msg a la pile de msg """
 		self.msg.append(msg)
 
 	def add_msg_if_true(self, flag, msg):
+		""" ajoute un msg a la pile de msg ssi flag est true """
 		if flag:
-			self.msg.append(msg)
+			self.add_msg(msg)
 
 	def add_msg_if_false(self, flag, msg):
+		""" ajoute un msg a la pile de msg ssi flag est false """
 		if not flag:
-			self.msg.append(msg)
+			self.add_msg(msg)
+
+	# exit context
 
 	def __exit__(self, exc_type, exc_value, traceback):
 		if self.msg and self.show_msg:

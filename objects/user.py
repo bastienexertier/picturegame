@@ -1,15 +1,21 @@
+""" module gerant les users """
+
+# pylint: disable=too-few-public-methods
 
 from objects.jsonable import Vue, Model
 from objects.team import TeamLeave
 import model.requests as req
 
 class User:
+	""" un squelette d'user, avec seulement un nom """
 	def __init__(self, name):
 		self.name = name
 
 class UserVue(User, Vue):
+	""" un user cree depuis la vue """
 	def _check(self, cursor):
 		res = cursor.get(req.user_with_name(), (self.name,))
+		cursor.add_msg_if_true(res, 'another user already has this name')
 		return not res
 
 	def _send_db(self, cursor):
@@ -27,9 +33,6 @@ class UserModelName(UserModel):
 		self.cursor = cursor
 		super().__init__(user_id, self.__get_name(user_id))
 
-	def json(self):
-		return self.name
-
 	def __get_name(self, user_id):
 		return self.cursor.get_one(req.user(), (user_id,))['name']
 
@@ -44,28 +47,3 @@ class RemoveUser(Vue):
 	def _send_db(self, cursor):
 		TeamLeave(self.user_id).send_db(cursor)
 		cursor.add(req.delete_user(), (self.user_id,))
-
-class UsersModel(Model):
-	""" une classe contenant la liste des joueurs """
-	def __init__(self, cursor):
-		self.users = UsersModel.__get_users(cursor)
-
-	@staticmethod
-	def __get_users(cursor):
-		return [UserModel(user['user_id'], user['name']) for user in cursor.get(req.users())]
-
-	def to_sorted(self):
-		""" retourne la liste des users triee par nom """
-		return sorted(self.users, key=lambda user: user.name)
-
-class UsersFromTeam(UsersModel):
-	def __init__(self, cursor, team_id):
-		self.cursor = cursor
-		self.team_id = team_id
-		self.users = self.__load()
-
-	def __load(self):
-		res = []
-		for user in self.cursor.get(req.users_of_team(), (self.team_id,)):
-			res.append(UserModel(user['user_id'], user['name']))
-		return res

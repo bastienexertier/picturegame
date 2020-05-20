@@ -13,6 +13,9 @@ img {
     image-orientation: from-image;
 }
 
+.italic {
+	 font-style: italic;
+}
 
 .jumbotron {
 	background-color: #303841;

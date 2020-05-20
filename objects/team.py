@@ -1,5 +1,7 @@
 """ module gerant les objets equipes """
 
+# pylint: disable=too-few-public-methods
+
 from itertools import chain
 
 from objects.jsonable import Vue, Model
@@ -19,8 +21,8 @@ class Team:
 
 class TeamModel(Team, Model):
 	""" une equipe venant du model """
-	def __init__(self, cursor, team_id, team_name, color, owner, points):
-		super().__init__(team_name, color, owner)
+	def __init__(self, cursor, team_id, points, *args):
+		super().__init__(*args)
 		self.cursor = cursor
 		self.team_id = team_id
 		self.points = points
@@ -40,9 +42,9 @@ class TeamModel(Team, Model):
 class TeamModelFromId(TeamModel):
 	""" une equipe a partir d'une id de team """
 	def __init__(self, cursor, team_id):
-		name, color, owner = TeamModelFromId.__load(cursor, team_id)
+		args = TeamModelFromId.__load(cursor, team_id)
 		points = TeamModel._load_points(cursor, team_id)
-		super().__init__(cursor, team_id, name, color, owner, points)
+		super().__init__(cursor, team_id, points, *args)
 
 	@staticmethod
 	def __load(cursor, team_id):
@@ -73,7 +75,7 @@ class TeamOf(TeamModelFromId):
 class TeamVue(Team, Vue):
 	""" une equipe venant de la vue, envoie dans la bd apres verif """
 	def __init__(self, user_id, team_name, color):
-		super().__init__(team_name, color)
+		super().__init__(team_name, color, user_id)
 		self.user_id = user_id
 
 	def _check(self, cursor):
@@ -115,8 +117,9 @@ class TeamsModel(Model):
 
 		for team in cursor.get(req.all_teams()):
 			team_id = team['team_id']
+			team_attrs = team['name'], team['color'], team['owner_id']
 			score = points.pop(team_id, 0)
-			res.append(TeamMedalModel(cursor, team_id, team['name'], team['color'], team['owner_id'], score))
+			res.append(TeamMedalModel(cursor, team_id, score, *team_attrs))
 		return res
 
 	@staticmethod
@@ -149,6 +152,11 @@ class TeamLeave(Vue):
 		self.team_id = None
 
 	def _check(self, cursor):
+		""" verifie que l'utilisateur a bien une tea, qu'il peut leave """
+		team = cursor.get_one(req.team_of_user(), (self.user_id,))
+		if not team:
+			cursor.add_msg('user doesnt have a team to leave')
+			return False
 		self.team_id = cursor.get_one(req.team_of_user(), (self.user_id,))['team_id']
 		return bool(self.team_id)
 

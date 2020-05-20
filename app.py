@@ -8,7 +8,7 @@ from flask_basicauth import BasicAuth
 import colors
 import getters
 from model.dbi import Cursor
-from objects.user import UserVue, UserModelName, UsersModel, RemoveUser, UsersFromTeam
+from objects.user import UserVue, UserModelName, AllUsers, RemoveUser, UsersFromTeam
 from objects.teammate import TeammateVue
 from objects.team import TeamsModel, TeamOf, TeamVue, TeamLeave, TeamModelFromId, NoTeamError
 from objects.objective import ObjectivesModel, ObjectiveVue, DeleteObjectiveVue, ObjectiveModelFromId
@@ -81,7 +81,7 @@ def home():
 	with Cursor() as cursor:
 		user = UserModelName(cursor, user_id)
 		teams = TeamsModel(cursor)
-		users = UsersModel(cursor)
+		users = AllUsers(cursor)
 		try:
 			my_team = TeamOf(cursor, user_id)
 		except NoTeamError:
@@ -216,7 +216,7 @@ def admin():
 	with Cursor() as cursor:
 		objs = ObjectivesModel(cursor)
 		teams = TeamsModel(cursor)
-		users = UsersModel(cursor)
+		users = AllUsers(cursor)
 		invalid_pictures = PicturesWithStatus(cursor, 0)
 		qrcodes = AllQRCodesModel(cursor)
 	return render_template('admin.html', objectives=objs, teams=teams, users=users, pictures=invalid_pictures.pictures, qrcodes=qrcodes.qrcodes)
