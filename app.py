@@ -144,7 +144,7 @@ def team_leave():
 	user_id = getters.user(session)
 	with Cursor() as cursor:
 		success = TeamLeave(user_id).send_db(cursor)
-	msg = "You can't leave your team if you're the owner."
+	msg = 'is owner'
 	return redirect('/home') if success else redirect('/team?msg={}'.format(msg))
 
 @app.route('/team/picture')

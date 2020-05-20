@@ -18,6 +18,9 @@
 		div.element span {
 			background-color: {{ team.color.colors[0] }}C0;
 		}
+		.footnote {
+			color: {{ team.color.colors[0] }}40;
+		}
 	</style>
 </head>
 <body>
@@ -36,7 +39,9 @@
 				<div class="element">
 					<h3>&#x2757; Error</h3>
 					<hr>
-					{{ msg }}
+					{% if msg == 'is owner' %}
+						You can't leave your team if you're the owner. Make someone else the owner by taping his name in the team page!
+					{% endif %}
 				</div>
 			</div>
 			{% endif %}
@@ -158,8 +163,11 @@
 			</div>
 
 
+		<hr>
+		<div class="col-12 text-center italic footnote">Made by Bastien Exertier, with a lot of tea.</div>
 		</div>
 	</div>
+
 	{% include 'footers.html' %}
 	<script type="text/javascript">
 		function delete_picture() {
