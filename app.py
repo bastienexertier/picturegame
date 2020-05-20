@@ -33,7 +33,7 @@ basic_auth = BasicAuth(app)
 def main_page():
 	if 'user' in session:
 		return redirect('/home')
-	return render_template('main_page.html')
+	return render_template('new_user.html')
 
 @app.route('/newuser')
 def new_user():
