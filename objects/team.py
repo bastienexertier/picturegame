@@ -6,6 +6,7 @@ from itertools import chain
 
 from objects.jsonable import Vue, Model
 from objects.teammate import TeammateVue
+from objects.users import UsersFromTeam
 import model.requests as req
 import colors
 

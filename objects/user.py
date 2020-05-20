@@ -3,7 +3,6 @@
 # pylint: disable=too-few-public-methods
 
 from objects.jsonable import Vue, Model
-from objects.team import TeamLeave
 import model.requests as req
 
 class User:
@@ -45,5 +44,4 @@ class RemoveUser(Vue):
 		return bool(cursor.get_one(req.user(), (self.user_id,)))
 
 	def _send_db(self, cursor):
-		TeamLeave(self.user_id).send_db(cursor)
 		cursor.add(req.delete_user(), (self.user_id,))

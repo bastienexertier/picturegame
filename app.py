@@ -258,6 +258,7 @@ def delete_user():
 	""" supprime l'utilisateur specifie """
 	user_id = request.args['user']
 	with Cursor() as cursor:
+		TeamLeave(user_id).send_db(cursor)
 		RemoveUser(user_id).send_db(cursor)
 	return redirect('/admin')
 
