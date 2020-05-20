@@ -177,3 +177,6 @@ def all_qr_found_by_team():
 		WHERE
 			qrs.qr_id = found_qr.qr_id
 			AND found_qr.team_id = ? """
+
+def change_owner():
+	return """ UPDATE teams SET owner_id = ? WHERE team_id = ? """

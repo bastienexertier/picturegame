@@ -19,6 +19,10 @@ class Team:
 		self.color = colors.Color(color)
 		self.owner = owner
 
+	def is_owned_by(self, user_id):
+		""" retourn vrai si l'id donne est celle de l'owner """
+		return self.owner == user_id
+
 class TeamModel(Team, Model):
 	""" une equipe venant du model """
 	def __init__(self, cursor, team_id, points, *args):
@@ -175,3 +179,12 @@ class RemoveTeamIfEmpty(Vue):
 
 	def _send_db(self, cursor):
 		cursor.add(req.delete_team(), (self.team_id,))
+
+class ChangeOwner(Vue):
+	""" change l'owner d'une team """
+	def __init__(self, team_id, new_owner):
+		self.team_id = team_id
+		self.new_owner = new_owner
+
+	def _send_db(self, cursor):
+		cursor.add(req.change_owner(), (self.new_owner, self.team_id))

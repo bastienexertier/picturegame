@@ -13,11 +13,11 @@ from objects.users import AllUsers, UsersFromTeam
 
 from objects.teammate import TeammateVue
 
-from objects.team import TeamsModel, TeamOf, TeamVue, TeamLeave, TeamModelFromId, NoTeamError
+from objects.team import TeamsModel, TeamOf, TeamVue, TeamLeave, TeamModelFromId, NoTeamError, ChangeOwner
 
 from objects.objective import ObjectivesModel, ObjectiveVue, DeleteObjectiveVue, ObjectiveModelFromId
 
-from objects.picture import PictureOfTeam, PictureVue, DeletePictureVue, DeletePictureIfOwner, AcceptPictureVue
+from objects.picture import PictureOfTeam, PictureVue, DeletePictureVue, AcceptPictureVue
 from objects.pictures import PicturesOfTeamModel, AllPicturesModel, PicturesWithStatus
 
 from objects.qrcode import QRCodeVue, QRCodeFromKey, QRDoesntExistError, FoundQRCodeVue, RemoveQRCode
@@ -174,11 +174,24 @@ def add_picture():
 
 @app.route('/team/picture/delete')
 def delete_picture():
+	""" supprime l'image si user est l'owner de son equipe """
 	user_id = getters.user(session)
 	obj_id = request.args['obj_id']
 	with Cursor() as cursor:
 		team = TeamOf(cursor, user_id)
-		DeletePictureIfOwner(team, obj_id, user_id).send_db(cursor)
+		if team.is_owned_by(user_id):
+			DeletePictureVue(team.team_id, obj_id).send_db(cursor)
+	return redirect('/team')
+
+@app.route('/team/owner')
+def change_owner():
+	""" change l'owner de lequipe """
+	user_id = getters.user(session)
+	new_owner = request.args['user']
+	with Cursor() as cursor:
+		team = TeamOf(cursor, user_id)
+		if team.is_owned_by(user_id):
+			ChangeOwner(team.team_id, new_owner).send_db(cursor)
 	return redirect('/team')
 
 # ================================ OBJECTIVES =================================

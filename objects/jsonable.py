@@ -9,7 +9,7 @@ class Vue:
 	""" une classe abstraire pour les objets a verifier, et envoyer dans la db """
 	def _check(self, cursor):
 		""" verifie si l'objet est valide pour l'envoi en db """
-		raise NotImplementedError('must override')
+		return True
 
 	def _send_db(self, cursor):
 		""" envoie l'objet en db """

@@ -41,11 +41,17 @@
 					<hr>
 					<div class="box-list">
 						{% for teammate in teammates %}
-							<span>
+							<span class="clickable-spans">
+							{% if teammate.user_id != user_id and user_id == team.owner %}
+							<a href="/team/owner?user={{ teammate.user_id }}" onclick="return change_owner('{{ teammate.name }}')">
+							{% endif %}
 								{% if teammate.user_id == team.owner %}&#x1F451; {% endif %}
 								{% if teammate.user_id == user_id %}&#x1F600; {% endif %}
 								{{ teammate.name }}
 							</span>
+							{% if teammate.user_id != user_id and user_id == team.owner %}
+							</a>
+							{% endif %}
 						{% endfor %}
 					</div>
 				</div>
@@ -149,6 +155,9 @@
 		}
 		function not_the_owner() {
 			return alert("Only the owner of the team can delete a picture");
+		}
+		function change_owner(username) {
+			return confirm(`Make ${username} the leader of the team?`)
 		}
 	</script>
 </body>
