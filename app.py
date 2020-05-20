@@ -114,7 +114,7 @@ def my_team():
 			team = TeamModelFromId(cursor, team_id)
 		except NoTeamError:
 			# permet de choisir une team si user n'en a pas
-			return redirect('/team/list' if team_id == -1 else '/home')
+			return redirect('/home/team/list' if team_id == -1 else '/home')
 
 		msg = request.args.get('msg', None)
 		teammates = UsersFromTeam(cursor, team_id)
@@ -230,7 +230,7 @@ def found_qrcode(qr_key):
 		team = TeamOf(cursor, user_id)
 		try:
 			qrcode = QRCodeFromKey(cursor, qr_key)
-			already = FoundQRCodeVue(team.team_id, qrcode.qr_id).send_db(cursor)
+			already = not FoundQRCodeVue(team.team_id, qrcode.qr_id).send_db(cursor)
 			return render_template('find_qr.html', team=team, exists=True, already=already, qrcode=qrcode)
 		except QRDoesntExistError:
 			return render_template('find_qr.html', team=team, exists=False)

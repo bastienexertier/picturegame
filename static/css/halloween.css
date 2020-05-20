@@ -1,0 +1,19 @@
+body {
+	background-color: #d35400;
+	color: #ecf0f1;
+}
+.jumbotron {
+	background-color: #7a3000;
+}
+.element {
+	background-color: #7a300080;
+}
+.theme-big-title::before, .theme-big-title::after {
+	content: "\01F383";
+}
+.theme-person::before {
+	content: "\01F9DF";
+}
+.theme-team::before {
+	content: "\01F578";
+}

@@ -150,6 +150,10 @@ class TeamsModel(Model):
 		""" retourne la liste de team sous forme de dict(team_id) = team """
 		return {team.team_id: team for team in self.teams}
 
+	def owners(self):
+		""" retourne un dict d'id de users qui sont des owners de team """
+		return {team.owner: team for team in self.teams}
+
 class TeamLeave(Vue):
 	""" represente un user qui quitte son equipe, l'equipe est detruite si vide """
 	def __init__(self, user_id):
