@@ -218,9 +218,11 @@ def random_picture():
 	with Cursor() as cursor:
 		pics = AllPicturesModel(cursor)
 		pic = pics.random_picture()
-		obj = ObjectiveModelFromId(cursor, pic.objective_id)
-		team = TeamModelFromId(cursor, pic.team_id)
-		return render_template('random_picture.html', team=team, pic=pic, obj=obj)
+		if pic:
+			obj = ObjectiveModelFromId(cursor, pic.objective_id)
+			team = TeamModelFromId(cursor, pic.team_id)
+			return render_template('random_picture.html', team=team, pic=pic, obj=obj)
+		return render_template('random_picture.html', pic=False)
 
 @app.route('/qrcodes/<qr_key>')
 def found_qrcode(qr_key):

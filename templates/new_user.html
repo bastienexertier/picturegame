@@ -7,22 +7,34 @@
 <body>
 	<div class="jumbotron">
 		<div class="row text-center">
-			<h1 class="col-12">New Player</h1>
+			<h2 class="col-2 theme-person"></h2>
+			<h2 class="col-8 line-middle"> New Player </h2>
+			<h2 class="col-2 theme-person"></h2>
 		</div>
 	</div>
-	<div class="container">
-		<form class="name-form" action="newuser">
-			<div class="row text-center">
-				<label for="name">Name</label>
+	<form class="name-form" action="newuser">
+		<div class="container">
+			<div class="row">
+
+				<div class="col-12 col-md-6 offset-md-3 col-xl-4 offset-xl-4 element-container">
+					<div class="element">
+						<h3>&#x1F39F; Player Name</h3>
+						<hr>
+						<div class="text-center">
+							<input type="text" name="name" placeholder="Stephan Hoe" required>
+						</div>
+					</div>
+				</div>
+
+
+				<button class="col-12 col-md-6 offset-md-3 col-xl-4 offset-xl-4 element-container" type="submit">
+					<div class="element text-center">
+						<h2>&#x2705;</h2>
+					</div>
+				</button>
 			</div>
-			<div class="row text-center">
-				<input type="text" name="name" placeholder="Stephan Hoe" required>
-			</div>
-			<div class="row text-center">
-				<button type="submit">&#x2705;</button>
-			</div>
-		</form>
-	</div>
+		</div>
+	</form>
 	{% include 'footers.html' %}
 </body>
 </html>

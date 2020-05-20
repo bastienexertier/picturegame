@@ -50,7 +50,7 @@ class AllPicturesModel(PicturesModel):
 		for team_pics in self.pictures.values():
 			for pic in team_pics.values():
 				pic_list.append(pic)
-		return choice(pic_list)
+		return choice(pic_list) if pic_list else None
 
 class PicturesWithStatus(PicturesModel):
 	""" une classe pour aller chercher les images avec un certain status """
