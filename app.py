@@ -5,11 +5,10 @@ from flask import Flask, render_template, request, redirect, session, send_file,
 from flask_basicauth import BasicAuth
 
 import colors
-import getters
 import init
 from model.dbi import Cursor
 
-from objects.user import UserVue, UserModelName, RemoveUser
+from objects.user import UserVue, UserModelName, RemoveUser, NoUserError
 from objects.users import AllUsers, UsersFromTeam
 
 from objects.teammate import TeammateVue
@@ -33,7 +32,12 @@ basic_auth = BasicAuth(app)
 @app.route('/')
 def main_page():
 	if 'user' in session:
-		return redirect('/home')
+		try:
+			with Cursor() as cursor:
+				UserModelName(cursor, getter_user(session))
+			return redirect('/home')
+		except NoUserError:
+			pass
 	return render_template('new_user.html')
 
 @app.route('/newuser')
@@ -50,7 +54,7 @@ def new_user():
 @app.route('/home')
 def home():
 	""" """
-	user_id = getters.user(session)
+	user_id = getter_user(session)
 	is_admin = 'admin' in session and int(session['admin']) == 1
 	with Cursor() as cursor:
 		user = UserModelName(cursor, user_id)
@@ -67,7 +71,7 @@ def home():
 
 @app.route('/home/team/list')
 def user_page():
-	user_id = getters.user(session)
+	user_id = getter_user(session)
 	with Cursor() as cursor:
 		user = UserModelName(cursor, user_id)
 		teams = TeamsModel(cursor)
@@ -79,7 +83,7 @@ def team_join():
 	# redirection vers team/list au lieu de user create
 	if 'team' not in request.args:
 		return redirect('/home/team/list')
-	user_id = getters.user(session)
+	user_id = getter_user(session)
 	team_id = int(request.args['team'])
 	with Cursor() as cursor:
 		TeammateVue(user_id, team_id, 0).send_db(cursor)
@@ -96,7 +100,7 @@ def new_team_go():
 	if 'teamname' not in request.args:
 		return redirect('/home/team/new')
 	team_name = request.args['teamname'].capitalize()
-	user_id = getters.user(session)
+	user_id = getter_user(session)
 	color = int(request.args['color'])
 	with Cursor() as cursor:
 		TeamVue(user_id, team_name, color).send_db(cursor)
@@ -144,7 +148,7 @@ def get_team_id(cursor, user_id, args):
 @app.route('/team/leave')
 def team_leave():
 	""" un utilisateur qui quitte son equipe """
-	user_id = getters.user(session)
+	user_id = getter_user(session)
 	with Cursor() as cursor:
 		success = TeamLeave(user_id).send_db(cursor)
 	msg = 'is owner'
@@ -165,7 +169,7 @@ def add_picture():
 		file = request.files['file']
 		if file.filename:
 			with Cursor() as cursor:
-				user_id = getters.user(session)
+				user_id = getter_user(session)
 				team_id = TeamOf(cursor, user_id).team_id
 				obj_id = request.form['obj_id']
 				pic = PictureVue(team_id, obj_id, file).send_db(cursor)
@@ -174,7 +178,7 @@ def add_picture():
 @app.route('/team/picture/delete')
 def delete_picture():
 	""" supprime l'image si user est l'owner de son equipe """
-	user_id = getters.user(session)
+	user_id = getter_user(session)
 	obj_id = int(request.args['obj_id'])
 	with Cursor() as cursor:
 		team = TeamOf(cursor, user_id)
@@ -185,7 +189,7 @@ def delete_picture():
 @app.route('/team/owner')
 def change_owner():
 	""" change l'owner de lequipe """
-	user_id = getters.user(session)
+	user_id = getter_user(session)
 	new_owner = int(request.args['user'])
 	with Cursor() as cursor:
 		team = TeamOf(cursor, user_id)
@@ -229,7 +233,7 @@ def random_picture():
 def found_qrcode(qr_key):
 	""" page quand quelqu'un trouve un qrcode """
 	with Cursor() as cursor:
-		user_id = getters.user(session)
+		user_id = getter_user(session)
 		team = TeamOf(cursor, user_id)
 		try:
 			qrcode = QRCodeFromKey(cursor, qr_key)
@@ -311,7 +315,7 @@ def admin_qrcode_img(qr_key):
 
 # ============================ ERROR HANDLERS =================================
 
-@app.errorhandler(getters.NoUserError)
+@app.errorhandler(NoUserError)
 def handle_no_user_error(_):
 	""" redirige le client vers la creation d'user si user nest pas defini """
 	return redirect('/')
@@ -320,6 +324,14 @@ def handle_no_user_error(_):
 def handle_no_team_error(_):
 	""" redirige le client vers la selection d'equipe si une erreur survient """
 	return redirect('/home/team/list')
+
+# =================================== UTILS ===================================
+
+def getter_user(session):
+	""" retourne l'user_id si dans session, sinon exception """
+	if 'user' not in session:
+		raise NoUserError()
+	return session['user']
 
 init.main()
 if __name__ == '__main__':

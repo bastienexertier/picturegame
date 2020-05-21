@@ -5,6 +5,9 @@
 from objects.jsonable import Vue, Model
 import model.requests as req
 
+class NoUserError(Exception):
+	""" une erreur si l'utilisateur n'est pas defini cote client """
+
 class User:
 	""" un squelette d'user, avec seulement un nom """
 	def __init__(self, name):
@@ -33,7 +36,10 @@ class UserModelName(UserModel):
 		super().__init__(user_id, self.__get_name(user_id))
 
 	def __get_name(self, user_id):
-		return self.cursor.get_one(req.user(), (user_id,))['name']
+		req_res = self.cursor.get_one(req.user(), (user_id,))
+		if not req_res:
+			raise NoUserError()
+		return req_res['name']
 
 class RemoveUser(Vue):
 	""" supprime un user de la db en fct de son id """

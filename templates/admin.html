@@ -118,12 +118,7 @@
 						{% for user in sorted_users %}
 							<span class="col-2 text-center" onclick="return delete_user(this, '{{ user.user_id }}');">&#x274C;</span>
 							<h5 class="col-9 line-middle ellipseable">
-								{% if user.user_id in owners_dict %}
-									<a href="/team?team={{ owners_dict[user.user_id].team_id }}">
-										&#x1F451;
-									</a>
-								{% endif %}
-								{{ user.name }}
+								{% if user.user_id in owners_dict %}<a href="/team?team={{ owners_dict[user.user_id].team_id }}">&#x1F451;</a>{% endif %}{{ user.name }}
 							</h5>
 						{% endfor %}
 					</div>
