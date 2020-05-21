@@ -166,9 +166,7 @@ def add_picture():
 				user_id = getters.user(session)
 				team_id = TeamOf(cursor, user_id).team_id
 				obj_id = request.form['obj_id']
-				pic = PictureVue(team_id, obj_id)
-				pic.send_db(cursor)
-			file.save(join('uploads', pic.filename))
+				pic = PictureVue(team_id, obj_id, file).send_db(cursor)
 	return redirect('/team')
 
 @app.route('/team/picture/delete')

@@ -22,9 +22,10 @@ class Picture:
 
 class PictureVue(Picture, Vue):
 	""" une image ajoutee par un user """
-	def __init__(self, team_id, objective_id):
+	def __init__(self, team_id, objective_id, file):
 		super().__init__(team_id, objective_id)
 		self.filename = PictureVue.__create_filename()
+		self.file = file
 
 	@staticmethod
 	def __create_filename():
@@ -38,6 +39,7 @@ class PictureVue(Picture, Vue):
 		return not self.is_uploaded(cursor)
 
 	def _send_db(self, cursor):
+		self.file.save(join(PATH, 'uploads', self.filename))
 		cursor.add(req.add_picture(), (self.team_id, self.objective_id, self.filename, 0))
 
 class PictureModel(Picture, Model):
