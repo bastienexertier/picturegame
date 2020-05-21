@@ -40,7 +40,7 @@ class QRCodeVue(QRCode, Vue):
 	def _send_db(self, cursor):
 		key = QRCodeVue.__create_key(cursor)
 		filename = key + '.png'
-		target_url = '{}qrcode/{}'.format(URL, key)
+		target_url = '{}qrcodes/{}'.format(URL, key)
 		create_qrcode(target_url, join('qrcodes', filename))
 		cursor.add(req.new_qr(), (key, self.points, self.description))
 
