@@ -6,7 +6,7 @@ from flask_basicauth import BasicAuth
 
 import colors
 import getters
-import model.db_init
+import init
 from model.dbi import Cursor
 
 from objects.user import UserVue, UserModelName, RemoveUser
@@ -320,7 +320,6 @@ def handle_no_team_error(_):
 	""" redirige le client vers la selection d'equipe si une erreur survient """
 	return redirect('/team/list')
 
-
-model.db_init.main()
+init.main()
 if __name__ == '__main__':
 	app.run('0.0.0.0')

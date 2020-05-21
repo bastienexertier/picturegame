@@ -8,10 +8,9 @@ from os import remove
 from os.path import join
 from subprocess import check_output
 
+from path import PATH, URL
 from objects.jsonable import Vue, Model
 import model.requests as req
-
-TARGET_BASE_URL = 'http://192.168.0.5:5000'
 
 class QRDoesntExistError(Exception):
 	""" une exception si le qr n'existe pas """
@@ -41,7 +40,7 @@ class QRCodeVue(QRCode, Vue):
 	def _send_db(self, cursor):
 		key = QRCodeVue.__create_key(cursor)
 		filename = key + '.png'
-		target_url = '{}/qrcode/{}'.format(TARGET_BASE_URL, key)
+		target_url = '{}/qrcode/{}'.format(URL, key)
 		create_qrcode(target_url, join('qrcodes', filename))
 		cursor.add(req.new_qr(), (key, self.points, self.description))
 
@@ -94,6 +93,6 @@ class FoundQRCodeVue(Vue):
 
 def create_qrcode(data, filename):
 	""" cree et sauve un qrcode """
-	cmd = 'qr "{}" > /home/DigitalBananaDirector/picturegame/{}'.format(data, filename)
+	cmd = 'qr "{}" > {}{}'.format(data, PATH, filename)
 	# ne depend pas d'entree user donc shell=True est ok
 	return check_output(cmd, shell=True)

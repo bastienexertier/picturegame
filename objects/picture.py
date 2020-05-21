@@ -6,6 +6,7 @@ from random import choice
 from string import ascii_lowercase
 from os.path import isfile, join
 
+from path import PATH
 from objects.jsonable import Vue, Model
 import model.requests as req
 
@@ -30,7 +31,7 @@ class PictureVue(Picture, Vue):
 		""" trouve un nom de fichier a donne a l'image, qui ne soit pas pris """
 		while True:
 			filename = ''.join(choice(ascii_lowercase) for i in range(10)) + '.jpg'
-			if not isfile(join('uploads', filename)):
+			if not isfile(join(PATH, 'uploads/', filename)):
 				return filename
 
 	def _check(self, cursor):
