@@ -2,7 +2,7 @@
 
 import os
 from path import PATH
-import model.db_init
+from model.db_init import db_init_main, DBNAME
 
 def create_folder_if_doesnt_exit(path, foldername):
 	""" cree le dossier si il n'existe pas deja """
@@ -18,9 +18,9 @@ def main():
 	""" main """
 	create_folder_if_doesnt_exit(PATH, 'uploads')
 	create_folder_if_doesnt_exit(PATH, 'qrcodes')
-	if not os.path.isfile(model.db_init.DBNAME):
+	if not os.path.isfile(DBNAME):
 		print('* database doesnt exist')
-		model.db_init.main()
+		db_init_main()
 		print('* database initialized')
 	else:
 		print('* database already exists')

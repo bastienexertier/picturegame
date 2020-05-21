@@ -7,7 +7,7 @@ from path import PATH
 DBNAME = PATH + 'model/test.db'
 SQLINIT = PATH + 'model/tables.sql'
 
-def main():
+def db_init_main():
 	""" drop toutes les tables et les recree """
 	with open(SQLINIT, 'r') as f_sql:
 		script = f_sql.read()
