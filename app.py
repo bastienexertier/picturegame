@@ -51,15 +51,17 @@ def new_user():
 def home():
 	""" """
 	user_id = getters.user(session)
+	is_admin = 'admin' in session and int(session['admin']) == 1
 	with Cursor() as cursor:
 		user = UserModelName(cursor, user_id)
 		teams = TeamsModel(cursor)
 		users = AllUsers(cursor)
 		try:
-			my_team = TeamOf(cursor, user_id)
+			user_team = TeamOf(cursor, user_id)
 		except NoTeamError:
-			my_team = None
-	return render_template('home_page.html', teams=teams, my_team=my_team, users=users, me=user)
+			user_team = None
+	return render_template('home_page.html', teams=teams, my_team=user_team,\
+		users=users, me=user, admin=is_admin)
 
 # ================================= JOIN TEAM =================================
 
@@ -242,6 +244,7 @@ def found_qrcode(qr_key):
 @basic_auth.required
 def admin():
 	""" sert la page d'administration """
+	session['admin'] = 1
 	with Cursor() as cursor:
 		objs = ObjectivesModel(cursor)
 		teams = TeamsModel(cursor)

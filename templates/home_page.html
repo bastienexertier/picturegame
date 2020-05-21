@@ -26,6 +26,9 @@
 				<div class="element">
 					<h3 class="theme-person"> You</h3>
 					<h5 class="italic text-center">{{ me.name }}</h5>
+					{% if admin %}
+					<h5 class="text-center"><a href="/admin">&#x1F529; Go to admin page</a></h5>
+					{% endif %}
 				</div>
 			</div>
 
@@ -37,7 +40,7 @@
 <!-- 							<h5 class="col-2 line-left">
 								&#x1F4AA;
 							</h5> -->
-							<h5 class="col-9 ellipseable italic">
+							<h5 class="offset-2 col-7 line-middle ellipseable italic">
 								<a href="/team?team={{ my_team.team_id }}">{{ my_team.name }}</a>
 							</h5>
 							<h5 class="col-3 line-right">
@@ -68,7 +71,10 @@
 								{% else %}&#x1F44D;{% endif %}
 							</h5>
 							<h5 class="col-6 line-middle ellipseable">
-								<a href="/team?team={{ team.team_id }}">{{ team.name }}</a>
+								<a href="/team?team={{ team.team_id }}">
+									{{ team.name }}
+									{% if team.team_id == my_team.team_id %}&#x1F496; {% endif %}
+								</a>
 							</h5>
 							<h5 class="col-4 line-right">
 								{{ team.points }}&#x1F3C6;
