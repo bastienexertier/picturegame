@@ -316,7 +316,7 @@ def handle_no_user_error(_):
 @app.errorhandler(NoTeamError)
 def handle_no_team_error(_):
 	""" redirige le client vers la selection d'equipe si une erreur survient """
-	return redirect('/team/list')
+	return redirect('/home/team/list')
 
 init.main()
 if __name__ == '__main__':
