@@ -55,7 +55,7 @@ class RemoveQRCode(Vue):
 
 	def _send_db(self, cursor):
 		cursor.add(req.delete_qr(), (self.key,))
-		remove(join('qrcodes', self.key + '.png'))
+		remove(join(PATH, 'qrcodes', self.key + '.png'))
 
 class QRCodeModel(QRCode, Model):
 	""" un qrcode venant du model """
