@@ -114,9 +114,9 @@
 				<div class="element">
 					<h3 class="theme-person"> Players</h3>
 					<hr>
-					<div class="row">
+					<div class="row clickable-spans">
 						{% for user in sorted_users %}
-							<a class="col-2 text-center" href="/admin/user/delete?user={{ user.user_id }}" onclick="return delete_element('user', this);">&#x274C;</a>
+							<span class="col-2 text-center" onclick="return delete_user(this, '{{ user.user_id }}');">&#x274C;</span>
 							<h5 class="col-9 line-middle ellipseable">
 								{% if user.user_id in owners_dict %}
 									<a href="/team?team={{ owners_dict[user.user_id].team_id }}">
@@ -135,6 +135,16 @@
 	</div>
 	{% include 'footers.html' %}
 	<script type="text/javascript">
+		function delete_user(div, user_id) {
+			if (delete_element('user', div)) {
+				fetch(`/admin/user/delete?user=${user_id}`).then(response => response.json()).then(json => {
+					if (json.status) {
+						div.parentElement.removeChild(div.nextElementSibling);
+						div.parentElement.removeChild(div);
+					}
+				});
+			}
+		}
 		function delete_element(element_type, t) {
 			return confirm(`Delete ${element_type} '${t.nextElementSibling.textContent.trim()}'?`);
 		}

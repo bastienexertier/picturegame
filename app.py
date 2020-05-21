@@ -1,7 +1,7 @@
 """ fichier controlleur de l'appli """
 
 from os.path import join
-from flask import Flask, render_template, request, redirect, session, send_file
+from flask import Flask, render_template, request, redirect, session, send_file, jsonify
 from flask_basicauth import BasicAuth
 
 import colors
@@ -261,8 +261,8 @@ def delete_user():
 	user_id = request.args['user']
 	with Cursor() as cursor:
 		TeamLeave(user_id).send_db(cursor)
-		RemoveUser(user_id).send_db(cursor)
-	return redirect('/admin')
+		status = RemoveUser(user_id).send_db(cursor)
+	return jsonify(status=status)
 
 @app.route('/admin/picture/delete')
 @basic_auth.required
@@ -272,7 +272,7 @@ def admin_delete_picture():
 	obj_id = request.args['obj']
 	with Cursor() as cursor:
 		DeletePictureVue(team_id, obj_id).send_db(cursor)
-	return redirect('/admin')
+		return redirect('/admin')
 
 @app.route('/admin/picture/accept')
 @basic_auth.required
