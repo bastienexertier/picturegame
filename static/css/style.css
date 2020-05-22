@@ -18,6 +18,7 @@ img {
 .jumbotron {
 	background-color: #2c3e50;
 	border-radius: 0px;
+	box-shadow: 2px 2px 10px 0px rgba(0,0,0,0.4);
 }
 
 .jumbotron .row {
@@ -38,6 +39,7 @@ img {
 	padding: 10px;
 	margin-top: 0px;
 	margin-bottom: 20px;
+	box-shadow: 2px 2px 10px 0px rgba(0,0,0,0.4);
 }
 
 .element-container {
@@ -133,7 +135,7 @@ button {
 	flex-wrap: wrap;
 }
 
-.box-list span {
+.box-list span, .box-list a {
 	padding: 4px 8px 4px;
 	margin: 0px 3px 6px;
 	border-radius: 3px;

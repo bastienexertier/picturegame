@@ -30,42 +30,43 @@ app.config['BASIC_AUTH_PASSWORD'] = 'suce_mak'
 basic_auth = BasicAuth(app)
 
 @app.route('/')
-def main_page():
-	if 'user' in session:
-		try:
-			with Cursor() as cursor:
-				UserModelName(cursor, getter_user(session))
-			return redirect('/home')
-		except NoUserError:
-			pass
-	return render_template('new_user.html')
-
-@app.route('/newuser')
-def new_user():
-	if 'name' not in request.args:
-		return redirect('/')
-	user = UserVue(request.args['name'])
-	with Cursor() as cursor:
-		if not user.send_db(cursor):
-			return redirect('/')
-		session['user'] = max(cursor.cursor.lastrowid, 1)
+def index():
+	""" redirige vers home """
 	return redirect('/home')
 
 @app.route('/home')
 def home():
-	""" """
-	user_id = getter_user(session)
-	is_admin = 'admin' in session and int(session['admin']) == 1
+	""" page principale """
 	with Cursor() as cursor:
-		user = UserModelName(cursor, user_id)
+		try:
+			user_id = getter_user(session)
+			user = UserModelName(cursor, user_id)
+		except NoUserError:
+			user_id = None
+			user = None
+		if user:
+			try:
+				user_team = TeamOf(cursor, user_id)
+			except NoTeamError:
+				user_team = None
+		else:
+			user_team = None
 		teams = TeamsModel(cursor)
 		users = AllUsers(cursor)
-		try:
-			user_team = TeamOf(cursor, user_id)
-		except NoTeamError:
-			user_team = None
+		is_admin = session.get('admin', 0) == 1
 	return render_template('home_page.html', teams=teams, my_team=user_team,\
 		users=users, me=user, admin=is_admin)
+
+@app.route('/newuser')
+def new_user():
+	""" reception des donnees pour la creation d'un user """
+	if 'name' not in request.args:
+		return redirect('/')
+	user = UserVue(request.args['name'])
+	with Cursor() as cursor:
+		user.send_db(cursor)
+		session['user'] = max(cursor.cursor.lastrowid, 1)
+	return redirect('/home')
 
 # ================================= JOIN TEAM =================================
 
@@ -318,7 +319,7 @@ def admin_qrcode_img(qr_key):
 @app.errorhandler(NoUserError)
 def handle_no_user_error(_):
 	""" redirige le client vers la creation d'user si user nest pas defini """
-	return redirect('/')
+	return redirect('/home')
 
 @app.errorhandler(NoTeamError)
 def handle_no_team_error(_):

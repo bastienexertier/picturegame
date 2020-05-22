@@ -27,9 +27,18 @@
 			<div class="col-12 col-md-6 col-xl-4 element-container">
 				<div class="element">
 					<h3 class="theme-person"> You</h3>
-					<h5 class="italic text-center">{{ me.name }}</h5>
-					{% if admin %}
-					<h5 class="text-center"><a href="/admin">&#x1F529; Go to admin page</a></h5>
+					{% if me %}
+						<h5 class="italic text-center">{{ me.name }}</h5>
+						{% if admin %}
+						<h5 class="text-center"><a href="/admin">&#x1F529; Go to admin page</a></h5>
+						{% endif %}
+					{% else %}
+						<form class="row" action="/newuser">
+							<hr>
+							<h5 class="col-3">Name:</h5>
+							<input class="col-7" type="text" name="name" placeholder="Stephan Hoe">
+							<button class="col-2" type="submit">&#x2705;</button>
+						</form>
 					{% endif %}
 				</div>
 			</div>
@@ -51,7 +60,7 @@
 						</div>
 					</div>
 				</div>
-			{% else %}
+			{% elif me %}
 				<div class="col-12 col-md-6 col-xl-4 element-container">
 					<div class="element">
 						<h3>&#x1F530; Join a Team</h3>
