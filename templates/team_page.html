@@ -65,9 +65,11 @@
 								{% if teammate.user_id == team.owner %}&#x1F451; {% endif %}
 								{% if teammate.user_id == user_id %}&#x1F600; {% endif %}
 								{{ teammate.name }}
-							</span>
 							{% if teammate.user_id != user_id and user_id == team.owner %}
 							</a>
+							{% endif %}
+							</span>
+							{% if teammate.user_id != user_id and user_id == team.owner %}
 							{% endif %}
 						{% endfor %}
 					</div>
