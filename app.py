@@ -37,6 +37,7 @@ def index():
 @app.route('/home')
 def home():
 	""" page principale """
+	msg = request.args.get('msg', None)
 	with Cursor() as cursor:
 		try:
 			user_id = getter_user(session)
@@ -55,7 +56,7 @@ def home():
 		users = AllUsers(cursor)
 		is_admin = session.get('admin', 0) == 1
 	return render_template('home_page.html', teams=teams, my_team=user_team,\
-		users=users, me=user, admin=is_admin)
+		users=users, me=user, admin=is_admin, msg=msg)
 
 @app.route('/newuser')
 def new_user():
@@ -64,9 +65,10 @@ def new_user():
 		return redirect('/')
 	user = UserVue(request.args['name'])
 	with Cursor() as cursor:
-		user.send_db(cursor)
+		if not user.send_db(cursor): # si user choisi un pseudo deja existant, on change pas session
+			return redirect('/home?msg=already')
 		session['user'] = max(cursor.cursor.lastrowid, 1)
-	return redirect('/home')
+		return redirect('/home')
 
 # ================================= JOIN TEAM =================================
 

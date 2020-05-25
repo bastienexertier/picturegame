@@ -15,12 +15,23 @@
 	<div class="container">
 		<div class="row">
 
-			<div class="col-12 col-md-6 col-xl-4 element-container">
-				<div class="element text-center">
-					<h3>&#x1F60D; Welcome &#x1F60D;</h3>
-					<h5 class="italic">I hope you will enjoy the game!</h5>
+			{% if msg %}
+				<div class="col-12 col-md-6 col-xl-4 element-container">
+					<div class="element text-center" style="background-color: #801336;">
+						<h3>&#x2757; Error &#x2757;</h3>
+						{% if msg == 'already' %}
+						<h5 class="italic">This username is already taken!</h5>
+						{% endif %}
+					</div>
 				</div>
-			</div>
+			{% else %}
+				<div class="col-12 col-md-6 col-xl-4 element-container">
+					<div class="element text-center">
+						<h3>&#x1F60D; Welcome &#x1F60D;</h3>
+						<h5 class="italic">I hope you will enjoy the game!</h5>
+					</div>
+				</div>
+			{% endif %}
 
 			<hr class="col-10 d-xl-none">
 
