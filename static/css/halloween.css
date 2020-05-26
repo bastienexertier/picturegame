@@ -8,7 +8,7 @@ body {
 .element {
 	background-color: #7a300080;
 }
-.theme-big-title::before, .theme-big-title::after {
+.theme-home::before {
 	content: "\01F383";
 }
 .theme-person::before {
