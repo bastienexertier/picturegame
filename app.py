@@ -63,7 +63,7 @@ def new_user():
 	""" reception des donnees pour la creation d'un user """
 	if 'name' not in request.args:
 		return redirect('/')
-	user = UserVue(request.args['name'])
+	user = UserVue(request.args['name'].strip().capitalize())
 	with Cursor() as cursor:
 		if not user.send_db(cursor): # si user choisi un pseudo deja existant, on change pas session
 			return redirect('/home?msg=already')

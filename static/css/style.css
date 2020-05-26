@@ -135,7 +135,7 @@ button {
 	flex-wrap: wrap;
 }
 
-.box-list span, .box-list a {
+.box-list span {
 	padding: 4px 8px 4px;
 	margin: 0px 3px 6px;
 	border-radius: 3px;
