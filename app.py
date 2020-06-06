@@ -336,6 +336,10 @@ def getter_user(session):
 		raise NoUserError()
 	return session['user']
 
+@app.route('/test')
+def test_qr():
+	return render_template('test_qr.html')
+
 init.main()
 if __name__ == '__main__':
 	app.run('0.0.0.0')
