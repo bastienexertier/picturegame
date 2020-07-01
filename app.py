@@ -6,9 +6,12 @@ from flask_basicauth import BasicAuth
 
 import colors
 import init
+from model import db
+from model.user import User
 from model.dbi import Cursor
 
-from objects.user import UserVue, UserModelName, RemoveUser, NoUserError
+
+from objects.user import UserModelName, RemoveUser, NoUserError
 from objects.users import AllUsers, UsersFromTeam
 
 from objects.teammate import TeammateVue
@@ -27,6 +30,7 @@ app = Flask(__name__)
 app.secret_key = 'turbo prout prout'
 app.config['BASIC_AUTH_USERNAME'] = 'admin'
 app.config['BASIC_AUTH_PASSWORD'] = 'suce_mak'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///model/test.db'
 basic_auth = BasicAuth(app)
 
 @app.route('/')
@@ -61,14 +65,12 @@ def home():
 @app.route('/newuser')
 def new_user():
 	""" reception des donnees pour la creation d'un user """
-	if 'name' not in request.args:
-		return redirect('/')
-	user = UserVue(request.args['name'].strip().capitalize())
-	with Cursor() as cursor:
-		if not user.send_db(cursor): # si user choisi un pseudo deja existant, on change pas session
-			return redirect('/home?msg=already')
-		session['user'] = max(cursor.cursor.lastrowid, 1)
-		return redirect('/home')
+	if 'name' in request.args:
+		user = User(name=request.args['name'].strip().capitalize())
+		db.session.add(user)
+		db.session.commit()
+		session['user'] = user.user_id
+	return redirect('/home')
 
 # ================================= JOIN TEAM =================================
 
@@ -342,4 +344,5 @@ def test_qr():
 
 init.main()
 if __name__ == '__main__':
+	db.init_app(app)
 	app.run('0.0.0.0')
