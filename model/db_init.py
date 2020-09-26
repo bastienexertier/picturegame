@@ -4,7 +4,7 @@ import sqlite3 as sql
 
 from path import PATH
 
-DBNAME = PATH + 'model/test.db'
+DBNAME = PATH + 'model/test2.db'
 SQLINIT = PATH + 'model/tables.sql'
 
 def db_init_main():
