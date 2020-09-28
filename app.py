@@ -32,7 +32,7 @@ def home():
 		'home_page.html',
 		teams=load_medals(TeamSchema(many=True).dump(Team.query.all())),
 		users=User.query.order_by('name').all(),
-		me=User.query.get(session.get('user', None)),
+		user=User.query.get(session.get('user', None)),
 		admin=is_admin(),
 		msg=request.args.get('msg', None)
 	)

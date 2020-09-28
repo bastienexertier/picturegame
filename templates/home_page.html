@@ -16,7 +16,7 @@
 		<div class="row">
 
 			{% if msg %}
-				<div class="col-12 col-md-6 col-xl-4 element-container">
+				<div class="col-12 element-container">
 					<div class="element text-center" style="background-color: #801336;">
 						<h3>&#x2757; Error &#x2757;</h3>
 						{% if msg == 'already' %}
@@ -25,7 +25,7 @@
 					</div>
 				</div>
 			{% else %}
-				<div class="col-12 col-md-6 col-xl-4 element-container">
+				<div class="col-12 element-container">
 					<div class="element text-center">
 						<h3>&#x1F60D; Welcome &#x1F60D;</h3>
 						<h5 class="italic">I hope you will enjoy the game!</h5>
@@ -33,13 +33,13 @@
 				</div>
 			{% endif %}
 
-			<hr class="col-10 d-xl-none">
+			<hr class="col-10">
 
 			<div class="col-12 col-md-6 col-xl-4 element-container">
 				<div class="element">
 					<h3 class="theme-person"> You</h3>
-					{% if me %}
-						<h5 class="italic text-center">{{ me.name }}</h5>
+					{% if user %}
+						<h5 class="italic text-center">{{ user.name }}</h5>
 						{% if admin %}
 						<h5 class="text-center"><a href="/admin">&#x1F529; Go to admin page</a></h5>
 						{% endif %}
@@ -54,38 +54,31 @@
 				</div>
 			</div>
 
-			{% if me and me.team %}
-				<div class="col-12 col-md-6 col-xl-4 element-container">
-					<div class="element">
-						<h3 class="theme-team"> My Team</h3>
-						<div class="row">
-							<h5 class="col-2 line-left">
-								&#x1F4AA;
-							</h5>
-							<h5 class="col-7 line-middle ellipseable italic">
-								<a href="/team/{{ me.team.id }}">{{ me.team.name }}</a>
-							</h5>
-							<h5 class="col-3 line-right">
-								{{ me.team.points }}&#x1F3C6;
-							</h5>
-						</div>
-					</div>
-				</div>
-			{% elif me %}
-				<div class="col-12 col-md-6 col-xl-4 element-container">
-					<div class="element">
-						<h3>&#x1F530; Join a Team</h3>
-						<h5 class="text-center"><a href="/home/team">Join</a></h5>
-					</div>
-				</div>
-			{% endif %}
-
-			<hr class="col-10">
-
 			<div class="col-12 col-md-6 col-xl-4 element-container">
 				<div class="element">
-					<h3 class="theme-team"> Ranking</h3>
+					<h3 class="theme-team"> Teams</h3>
 					<hr>
+					{% if user %}
+						<div class="row">
+							{% if user.team %}
+								<h5 class="col-2 line-left">&#x1F4AA;</h5>
+								<h5 class="col-8 text-center">
+									<a href="/team/{{ user.team.id }}">My Team</a>
+								</h5>
+								<h5 class="col-2 line-right">&#x1F4AA;</h5>
+							{% else %}
+								<h5 class="col-2 line-left">&#x1F195;</h5>
+								<h5 class="col-4 text-center">
+									<a href="/home/team/new">Create</a>
+								</h5>
+								<h5 class="col-4 text-center">
+									<a href="#" onclick="alert('Go to a team page and then click Join team')">Join</a>
+								</h5>
+								<h5 class="col-2 line-right">&#x1F917;</h5>
+							{% endif %}
+						</div>
+						<hr>
+					{% endif %}
 					<div class="row">
 						{% for team in teams %}
 							<h5 class="col-2 line-left">
@@ -97,7 +90,7 @@
 							<h5 class="col-6 line-middle ellipseable">
 								<a href="/team/{{ team.id }}">
 									{{ team.name }}
-									{% if me.team and team.id == me.team.id %}&#x1F496; {% endif %}
+									{% if user.team and team.id == user.team.id %}&#x1F496; {% endif %}
 								</a>
 							</h5>
 							<h5 class="col-4 line-right">
@@ -114,7 +107,7 @@
 					<hr>
 					<div class="row">
 						{% for user in users %}
-							{% set emoji_id = user.name.__hash__()%5 %}
+							{% set emoji_id = user.nauser.__hash__()%5 %}
 							<h5 class="col-2">
 								{% if emoji_id == 0 %}
 									&#x1F9D1;
