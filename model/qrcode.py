@@ -21,9 +21,6 @@ class QRCode(db.Model):
 	points = db.Column(db.Integer, nullable=False)
 	description = db.Column(db.String, nullable=False)
 
-	def remove(self):
-		remove(join(PATH, 'qrcodes', self.key + '.png'))
-
 	def __repr__(self):
 		return f'<QRCode "{self.id}" - "{self.description}" for {self.points} points>'
 
