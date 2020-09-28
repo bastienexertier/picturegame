@@ -34,7 +34,7 @@
 		<div class="row">
 
 			{% if msg %}
-			<div class="col-12 col-md-6 col-xl-4 element-container">
+			<div class="col-12 element-container">
 				<div class="element">
 					<h3>&#x2757; Error</h3>
 					<hr>
@@ -85,7 +85,7 @@
 					<div class="box-list">
 						{% for teammate in team.users %}
 							<span class="clickable-spans">
-							{% if teammate.id != user.id and user.id == team.owner %}
+							{% if teammate.id != user.id and user.id == team.owner.id %}
 							<a href="/team/owner?user={{ teammate.id }}" onclick="return change_owner('{{ teammate.name }}')">
 							{% endif %}
 								{% if teammate.id == team.owner.id %}&#x1F451; {% endif %}

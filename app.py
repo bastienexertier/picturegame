@@ -118,7 +118,7 @@ def team_leave():
 	user = User.query.get(getter_user(session))
 	team = user.team
 	if team.owner == user and len(team.users) > 1:
-		return redirect('/team?msg=is-owner')
+		return redirect(f'/team/{team.id}?msg=is-owner')
 
 	team.users.remove(user)
 	if not team.users:

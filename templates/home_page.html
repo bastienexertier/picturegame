@@ -8,7 +8,13 @@
 	<div class="jumbotron">
 		<div class="row text-center">
 			<h2 class="col-2 theme-home"></h2>
-			<h2 class="col-8 line-middle">Home</h2>
+			<h2 class="col-8 line-middle">
+				{% if admin %}
+				<span style="cursor: pointer" onclick="window.location='/admin'">Home</span>
+				{% else %}
+					Home
+				{% endif %}
+			</h2>
 			<h2 class="col-2 theme-home"></h2>
 		</div>
 	</div>
@@ -68,10 +74,10 @@
 								<h5 class="col-2 line-right">&#x1F4AA;</h5>
 							{% else %}
 								<h5 class="col-2 line-left">&#x1F195;</h5>
-								<h5 class="col-4 text-center">
+								<h5 class="col-4 line-middle">
 									<a href="/home/team/new">Create</a>
 								</h5>
-								<h5 class="col-4 text-center">
+								<h5 class="col-4 text-right">
 									<a href="#" onclick="alert('Go to a team page and then click Join team')">Join</a>
 								</h5>
 								<h5 class="col-2 line-right">&#x1F917;</h5>
