@@ -137,18 +137,18 @@
 							{% if edit or pic.status == 1 or is_admin %}
 								<img class="obj-img" src="/picture/{{ pic.filename }}">
 
-
-									
-									<div style="{{ 'display: none;' if not pic.comments }}">
-										<hr>
-										<div id="comments-{{ pic.id }}" class="comments">
-											{% for comment in pic.comments %}
-												<div class="box-list comment">
-													<span>{{ comment.user.name }} : <span>{{ comment.text }}</span></span>
-												</div>
-											{% endfor %}
+									{% if pic.status == 1 %}
+										<div style="{{ 'display: none;' if not pic.comments }}">
+											<hr>
+											<div id="comments-{{ pic.id }}" class="comments">
+												{% for comment in pic.comments %}
+													<div class="box-list comment">
+														<span>{{ comment.user.name }} : <span>{{ comment.text }}</span></span>
+													</div>
+												{% endfor %}
+											</div>
 										</div>
-									</div>
+									{% endif %}
 
 
 							{% else %}
@@ -168,8 +168,9 @@
 						<hr>
 						<div class="obj-row">
 							<h5 class="obj-points">&#x1F3C6;{{ obj.points }}</h5>
-							{% if obj.id in pictures and edit %}
+							{% if obj.id in pictures %}
 								<h5 class="obj-points new-comment" onclick="send_comment('{{ pic.id }}')">&#x1F4AC;</h5>
+								{% if edit %}
 								<h5 class="obj-points">
 									{% if user.id == team.owner.id %}
 									<a href="/team/picture/delete?pic={{ pic.id }}" onclick="return delete_picture()">
@@ -181,6 +182,7 @@
 									</a>
 									{% endif %}
 								</h5>
+								{% endif %}
 							{% endif %}
 						</div>
 					</div>
@@ -206,6 +208,7 @@
 		}
 		function send_comment(pic_id){
 				let text = prompt();
+				if (!text) return;
 				HTTP.post('/comment', {pic: pic_id, text: text}).then(() => append_comment(pic_id, '{{ user.name }}', text));
 		}
 		function append_comment(pic_id, username, text) {
