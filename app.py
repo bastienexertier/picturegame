@@ -29,14 +29,14 @@ def index():
 def home():
 	""" page principale """
 	try:
-		user_id = getter_user(session)
+		user = User.query.get(getter_user(session))
 	except NoUserError:
-		user_id = None
+		user = None
 	return render_template(
 		'home_page.html',
 		teams=load_medals(TeamSchema(many=True).dump(Team.query.all())),
 		users=User.query.order_by('name').all(),
-		me=User.query.get(user_id),
+		me=user,
 		admin=is_admin(),
 		msg=request.args.get('msg', None)
 	)

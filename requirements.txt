@@ -1,5 +1,6 @@
 Flask
 Flask-Basicauth
+Flask-Marshmallow
 qrcode
 pysqlite3
 qrcode[pil]
