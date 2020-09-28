@@ -1,6 +1,10 @@
 """ model.objective """
 
-from model import db
+from random import choice
+from string import ascii_lowercase
+from os.path import isfile, join
+
+from model import db, ma
 
 # pylint: disable=no-member
 
@@ -19,11 +23,30 @@ class Picture(db.Model):
 	filename = db.Column(db.String, nullable=False)
 	status = db.Column(db.Integer, nullable=False)
 
-	team = db.relationship('Team', cascade='all,delete')
-	objective = db.relationship('Objective', cascade='all,delete')
-
-	team = db.relationship('Team', backref=db.backref('pictures', cascade='all, delete'))
 	objective = db.relationship('Objective', backref=db.backref('teams', cascade='all, delete'))
 
 	def __repr__(self):
-		return f'<Picture for {self.objective} by {self.team.name}>'
+		return f'<Picture for {self.objective} by {self.team.name}, status={self.status}>'
+
+# =================================== SCHEMA ===================================
+
+class ObjectiveSchema(ma.Schema):
+	class Meta:
+		model = Objective
+		fields = ('id', 'points', 'description')
+
+class PictureSchema(ma.Schema):
+	class Meta:
+		model = Picture
+		fields = ('objective', 'filename', 'status')
+	objective = ma.Pluck(ObjectiveSchema, 'id')
+
+# ==================================== UTILS ====================================
+
+from path import PATH
+def save_file(file):
+	while True:
+		filename = ''.join(choice(ascii_lowercase) for i in range(10)) + '.jpg'
+		if not isfile(join(PATH, 'uploads', filename)):
+			file.save(join(PATH, 'uploads', filename))
+			return filename

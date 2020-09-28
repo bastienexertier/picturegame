@@ -14,13 +14,14 @@ def create_folder_if_doesnt_exit(path, foldername):
 	else:
 		print(' * {} already exists'.format(full_path))
 
-def main():
+def main(app, db):
 	""" main """
 	create_folder_if_doesnt_exit(PATH, 'uploads')
 	create_folder_if_doesnt_exit(PATH, 'qrcodes')
+	db.init_app(app)
 	if not os.path.isfile(DBNAME):
 		print(' * database doesnt exist')
-		db_init_main()
+		db_init_main(app, db)
 		print(' * database initialized')
 	else:
 		print(' * database already exists')

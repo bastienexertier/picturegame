@@ -4,17 +4,13 @@ import sqlite3 as sql
 
 from path import PATH
 
-DBNAME = PATH + 'model/test2.db'
-SQLINIT = PATH + 'model/tables.sql'
+DBNAME = PATH + 'model/test.db'
 
-def db_init_main():
+def db_init_main(app, db):
 	""" drop toutes les tables et les recree """
-	with open(SQLINIT, 'r') as f_sql:
-		script = f_sql.read()
-	with sql.connect(DBNAME) as conn:
-		cursor = conn.cursor()
-		cursor.executescript(script)
-		conn.commit()
+	app.app_context().push()
+	db.create_all()
+	db.session.commit()
 	print(' * Created database {}'.format(DBNAME))
 
 if __name__ == '__main__':

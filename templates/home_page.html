@@ -2,8 +2,6 @@
 <html>
 <head>
 	{% include 'headers.html' %}
-	{% set teams_dict = teams.to_dict() %}
-	{% set sorted_users = users.to_sorted() %}
 	<title>Home</title>
 </head>
 <body>
@@ -46,7 +44,7 @@
 						<h5 class="text-center"><a href="/admin">&#x1F529; Go to admin page</a></h5>
 						{% endif %}
 					{% else %}
-						<form class="row" action="/newuser">
+						<form class="row" action="/user" method="POST">
 							<hr>
 							<h5 class="col-3">Name:</h5>
 							<input class="col-7" type="text" name="name" placeholder="Stephan Hoe">
@@ -56,19 +54,19 @@
 				</div>
 			</div>
 
-			{% if my_team %}
+			{% if me and me.team %}
 				<div class="col-12 col-md-6 col-xl-4 element-container">
 					<div class="element">
 						<h3 class="theme-team"> My Team</h3>
 						<div class="row">
-<!-- 							<h5 class="col-2 line-left">
+							<h5 class="col-2 line-left">
 								&#x1F4AA;
-							</h5> -->
-							<h5 class="offset-2 col-7 line-middle ellipseable italic">
-								<a href="/team?team={{ my_team.team_id }}">{{ my_team.name }}</a>
+							</h5>
+							<h5 class="col-7 line-middle ellipseable italic">
+								<a href="/team/{{ me.team.id }}">{{ me.team.name }}</a>
 							</h5>
 							<h5 class="col-3 line-right">
-								{{ my_team.points }}&#x1F3C6;
+								{{ me.team.points }}&#x1F3C6;
 							</h5>
 						</div>
 					</div>
@@ -77,7 +75,7 @@
 				<div class="col-12 col-md-6 col-xl-4 element-container">
 					<div class="element">
 						<h3>&#x1F530; Join a Team</h3>
-						<h5 class="text-center"><a href="/home/team/list">Join</a></h5>
+						<h5 class="text-center"><a href="/home/team">Join</a></h5>
 					</div>
 				</div>
 			{% endif %}
@@ -89,7 +87,7 @@
 					<h3 class="theme-team"> Ranking</h3>
 					<hr>
 					<div class="row">
-						{% for team in teams.teams %}
+						{% for team in teams %}
 							<h5 class="col-2 line-left">
 								{% if team.medal == 1 %}&#x1F947;
 								{% elif team.medal == 2 %}&#x1F948;
@@ -97,13 +95,13 @@
 								{% else %}&#x1F44D;{% endif %}
 							</h5>
 							<h5 class="col-6 line-middle ellipseable">
-								<a href="/team?team={{ team.team_id }}">
+								<a href="/team/{{ team.id }}">
 									{{ team.name }}
-									{% if team.team_id == my_team.team_id %}&#x1F496; {% endif %}
+									{% if me.team and team.id == me.team.id %}&#x1F496; {% endif %}
 								</a>
 							</h5>
 							<h5 class="col-4 line-right">
-								{{ team.points }}&#x1F3C6;
+								{{ team.score }}&#x1F3C6;
 							</h5>
 						{% endfor %}
 					</div>
@@ -115,8 +113,8 @@
 					<h3 class="theme-person"> Players</h3>
 					<hr>
 					<div class="row">
-						{% for user in sorted_users %}
-							{% set emoji_id = range(0, 5) | random %}
+						{% for user in users %}
+							{% set emoji_id = user.name.__hash__()%5 %}
 							<h5 class="col-2">
 								{% if emoji_id == 0 %}
 									&#x1F9D1;

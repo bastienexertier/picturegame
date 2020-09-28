@@ -13,10 +13,8 @@ class Colors:
 	def __init__(self):
 		self.colors = []
 		for idx in range(len(COLORS)):
-			self.colors.append(Color(idx))
+			self.colors.append(get_color(idx))
 
-class Color:
-	""" un objet couleur a partir d'une id """
-	def __init__(self, color_id):
-		self.color_id = color_id%len(COLORS)
-		self.colors = COLORS[self.color_id]
+def get_color(color_id):
+	""" retourne la couleur de la color_id """
+	return COLORS[color_id%len(COLORS)]

@@ -2,3 +2,4 @@ Flask
 Flask-Basicauth
 qrcode
 pysqlite3
+qrcode[pil]

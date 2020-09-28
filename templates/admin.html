@@ -2,10 +2,6 @@
 <html>
 <head>
 	{% include 'headers.html' %}
-	{% set teams_dict = teams.to_dict() %}
-	{% set objs_dict = objectives.to_dict() %}
-	{% set sorted_users = users.to_sorted() %}
-	{% set owners_dict = teams.owners() %}
 	<title>Admin</title>
 </head>
 <body>
@@ -31,7 +27,7 @@
 					<h3 class="theme-team"> Teams</h3>
 					<hr>
 					<div class="row">
-						{% for team in teams.teams %}
+						{% for team in teams %}
 							<h5 class="col-2 line-left">
 								{% if team.medal == 1 %}&#x1F947;
 								{% elif team.medal == 2 %}&#x1F948;
@@ -39,10 +35,10 @@
 								{% else %}&#x1F44D;{% endif %}
 							</h5>
 							<h5 class="col-7 line-middle ellipseable">
-								<a href="/team?team={{ team.team_id }}">{{ team.name }}</a>
+								<a href="/team/{{ team.id }}">{{ team.name }}</a>
 							</h5>
 							<h5 class="col-3 line-right">
-								{{ team.points }}&#x1F3C6;
+								{{ team.score }}&#x1F3C6;
 							</h5>
 						{% endfor %}
 					</div>
@@ -54,13 +50,13 @@
 					<h3>&#x1F5BC; Pictures</h3>
 					<hr>
 					<div class="row">
-						{% for obj in objectives.objectives %}
-							<a class="col-2 line-left" href="objectives/delete?obj_id={{ obj.obj_id }}" onclick="return delete_element('objective', this);">&#x274C;</a>
+						{% for obj in objectives %}
+							<a class="col-2 line-left" href="/admin/objectives/delete?obj={{ obj.id }}" onclick="return delete_element('objective', this);">&#x274C;</a>
 							<h5 class="col-7 line-middle">{{ obj.description }}</h5>
 							<h5 class="col-3 line-right">{{ obj.points }}&#x1F3C6;</h5>
 						{% endfor %}
 					</div>
-					<form class="obj-row" action="objectives/new">
+					<form class="obj-row" action="/admin/objectives/new">
 							<input type="number" name="points" size="3" placeholder="Points" style="width: 25%">
 							<input type="text" name="descr" placeholder="Description" style="width: 60%">
 							<button type="submit">&#x2705;</button>
@@ -74,9 +70,9 @@
 					<hr>
 					<div class="row">
 						{% for qrcode in qrcodes %}
-								<a class="col-2 line-left" href="/admin/qrcodes/delete?qr={{ qrcode.key }}" onclick="return delete_element('QR code', this);">&#x274C;</a>
+								<a class="col-2 line-left" href="/admin/qrcodes/delete?qr={{ qrcode.id }}" onclick="return delete_element('QR code', this);">&#x274C;</a>
 								<h5 class="col-7 line-middle">
-									<a href="/admin/qrcodes/{{ qrcode.key }}">{{ qrcode.description }}</a>
+									<a href="/admin/qrcodes/{{ qrcode.id }}">{{ qrcode.description }}</a>
 								</h5>
 								<h5 class="col-3 line-right">{{ qrcode.points }}&#x1F3C6;</h5>
 						{% endfor %}
@@ -89,18 +85,18 @@
 				</div>
 			</div>
 
-			{% for team_id in pictures.keys() %}
+			{% for team, pics in pictures.items() %}
 				<div class="col-12 col-md-6 col-xl-4 element-container">
 					<div class="element">
-						<h3>&#x1F5BC; {{ teams_dict[team_id].name }}</h3>
+						<h3>&#x1F5BC; {{ team.name }}</h3>
 						<hr>
 						<div class="obj-list">
-							{% for obj_id, pic in pictures[team_id].items() %}
+							{% for pic in pics %}
 								<div>
 									<div class="obj-row">
-										<a href="/admin/picture/delete?team={{ team_id }}&obj={{ obj_id }}">&#x274C;</a>
-										<h6>{{ objs_dict[obj_id].description }}</h6>
-										<a href="/admin/picture/accept?team={{ team_id }}&obj={{ obj_id }}">&#x2705;</a>
+										<a href="/admin/picture/delete?team={{ team.id }}&obj={{ pic.objective.id }}">&#x274C;</a>
+										<h6>{{ pic.objective.description }}</h6>
+										<a href="/admin/picture/accept?team={{ team.id }}&obj={{ pic.objective.id }}">&#x2705;</a>
 									</div>
 									<img class="obj-img" src="/picture/{{ pic.filename }}">
 								</div>
@@ -115,10 +111,10 @@
 					<h3 class="theme-person"> Players</h3>
 					<hr>
 					<div class="row clickable-spans">
-						{% for user in sorted_users %}
-							<span class="col-2 text-center" onclick="return delete_user(this, '{{ user.user_id }}');">&#x274C;</span>
+						{% for user in users %}
+							<a href="/admin/user/delete?user={{ user.id }}" class="col-2 text-center" onclick="return delete_element('user', this);">&#x274C;</a>
 							<h5 class="col-9 line-middle ellipseable">
-								{% if user.user_id in owners_dict %}<a href="/team?team={{ owners_dict[user.user_id].team_id }}">&#x1F451;</a>{% endif %}{{ user.name }}
+								{% if user.team.owner == user %}<a href="/team/{{ user.team.id }}">&#x1F451;</a>{% endif %}{{ user.name }}
 							</h5>
 						{% endfor %}
 					</div>
@@ -130,16 +126,6 @@
 	</div>
 	{% include 'footers.html' %}
 	<script type="text/javascript">
-		function delete_user(div, user_id) {
-			if (delete_element('user', div)) {
-				fetch(`/admin/user/delete?user=${user_id}`).then(response => response.json()).then(json => {
-					if (json.status) {
-						div.parentElement.removeChild(div.nextElementSibling);
-						div.parentElement.removeChild(div);
-					}
-				});
-			}
-		}
 		function delete_element(element_type, t) {
 			return confirm(`Delete ${element_type} '${t.nextElementSibling.textContent.trim()}'?`);
 		}

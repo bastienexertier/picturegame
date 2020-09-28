@@ -5,13 +5,13 @@
 	<title>{{ team.name }}</title>
 	<style type="text/css">
 		body {
-			background-color: {{ team.color.colors[1] }};
+			background-color: {{ team.colors[1] }};
 		}
 		.jumbotron {
-			background-color: {{ team.color.colors[0] }};
+			background-color: {{ team.colors[0] }};
 		}
 		.element {
-			background-color: {{ team.color.colors[0] }}80;
+			background-color: {{ team.colors[0] }}80;
 		}
 	</style>
 </head>
@@ -43,7 +43,7 @@
 		</div>
 	</div>
 	<script type="text/javascript">
-		window.setTimeout(() => window.location = '/team', 5000);
+		window.setTimeout(() => window.location = '/team/{{ team.id }}', 5000);
 	</script>
 </body>
 </html>

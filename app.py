@@ -1,30 +1,14 @@
 """ fichier controlleur de l'appli """
 
 from os.path import join
-from flask import Flask, render_template, request, redirect, session, send_file, jsonify
+from flask import Flask, render_template, request, redirect, session, send_file
 from flask_basicauth import BasicAuth
 
 import colors
-import init
 from model import db
-from model.user import User
-from model.dbi import Cursor
-
-
-from objects.user import UserModelName, RemoveUser, NoUserError
-from objects.users import AllUsers, UsersFromTeam
-
-from objects.teammate import TeammateVue
-
-from objects.team import TeamsModel, TeamOf, TeamVue, TeamLeave, TeamModelFromId, NoTeamError, ChangeOwner
-
-from objects.objective import ObjectivesModel, ObjectiveVue, DeleteObjectiveVue, ObjectiveModelFromId
-
-from objects.picture import PictureOfTeam, PictureVue, DeletePictureVue, AcceptPictureVue
-from objects.pictures import PicturesOfTeamModel, AllPicturesModel, PicturesWithStatus
-
-from objects.qrcode import QRCodeVue, QRCodeFromKey, QRDoesntExistError, FoundQRCodeVue, RemoveQRCode
-from objects.qrcodes import AllQRCodesModel, QRCodesOfTeam
+from model.user import User, Team, TeamSchema, TeamFullSchema, load_medals
+from model.objective import Objective, Picture, save_file
+from model.qrcode import QRCode, FoundQR
 
 app = Flask(__name__)
 app.secret_key = 'turbo prout prout'
@@ -32,6 +16,9 @@ app.config['BASIC_AUTH_USERNAME'] = 'admin'
 app.config['BASIC_AUTH_PASSWORD'] = 'suce_mak'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///model/test.db'
 basic_auth = BasicAuth(app)
+
+class NoUserError(Exception):
+	""" une erreur si l'utilisateur n'est pas defini cote client """
 
 @app.route('/')
 def index():
@@ -41,58 +28,47 @@ def index():
 @app.route('/home')
 def home():
 	""" page principale """
-	msg = request.args.get('msg', None)
-	with Cursor() as cursor:
-		try:
-			user_id = getter_user(session)
-			user = UserModelName(cursor, user_id)
-		except NoUserError:
-			user_id = None
-			user = None
-		if user:
-			try:
-				user_team = TeamOf(cursor, user_id)
-			except NoTeamError:
-				user_team = None
-		else:
-			user_team = None
-		teams = TeamsModel(cursor)
-		users = AllUsers(cursor)
-		is_admin = session.get('admin', 0) == 1
-	return render_template('home_page.html', teams=teams, my_team=user_team,\
-		users=users, me=user, admin=is_admin, msg=msg)
+	try:
+		user_id = getter_user(session)
+	except NoUserError:
+		user_id = None
+	return render_template(
+		'home_page.html',
+		teams=load_medals(TeamSchema(many=True).dump(Team.query.all())),
+		users=User.query.order_by('name').all(),
+		me=User.query.get(user_id),
+		admin=is_admin(),
+		msg=request.args.get('msg', None)
+	)
 
-@app.route('/newuser')
+@app.route('/user', methods=['POST'])
 def new_user():
 	""" reception des donnees pour la creation d'un user """
-	if 'name' in request.args:
-		user = User(name=request.args['name'].strip().capitalize())
+	if 'name' in request.form:
+		user = User(name=request.form['name'].strip().capitalize())
 		db.session.add(user)
 		db.session.commit()
-		session['user'] = user.user_id
+		session['user'] = user.id
 	return redirect('/home')
 
 # ================================= JOIN TEAM =================================
 
-@app.route('/home/team/list')
+@app.route('/home/team')
 def user_page():
-	user_id = getter_user(session)
-	with Cursor() as cursor:
-		user = UserModelName(cursor, user_id)
-		teams = TeamsModel(cursor)
-		return render_template('team_list.html', user=user, teams=teams.teams)
+	return render_template('team_list.html',
+		teams=TeamSchema(many=True).dump(Team.query.all()))
 
 @app.route('/home/team/join')
 def team_join():
-	# si l'user est supprime et qu'il essaye de rejoindre une team,
-	# redirection vers team/list au lieu de user create
-	if 'team' not in request.args:
-		return redirect('/home/team/list')
-	user_id = getter_user(session)
-	team_id = int(request.args['team'])
-	with Cursor() as cursor:
-		TeammateVue(user_id, team_id, 0).send_db(cursor)
-	return redirect('/team')
+	team = Team.query.get(request.args['team'])
+	if 'team' not in request.args or team is None:
+		return redirect('/home/team')
+
+	user = User.query.get(getter_user(session))
+	if not user.team:
+		team.users.append(user)
+		db.session.commit()
+	return redirect(f'/team/{user.team.id}')
 
 @app.route('/home/team/new')
 def new_team():
@@ -102,150 +78,124 @@ def new_team():
 @app.route('/home/team/new/go')
 def new_team_go():
 	""" ajoute la team dans le model """
-	if 'teamname' not in request.args:
+	if 'teamname' not in request.args or 'color' not in request.args:
 		return redirect('/home/team/new')
-	team_name = request.args['teamname'].capitalize()
-	user_id = getter_user(session)
-	color = int(request.args['color'])
-	with Cursor() as cursor:
-		TeamVue(user_id, team_name, color).send_db(cursor)
-	return redirect('/team')
+
+	if not (user := User.query.get(getter_user(session))).team:
+		team = Team(
+			name=request.args['teamname'].capitalize(),
+			owner=user,
+			color=int(request.args['color'])
+		)
+		team.users.append(user)
+		db.session.add(team)
+		db.session.commit()
+	return redirect(f'/team/{user.team.id}')
 
 # =================================== TEAM ====================================
 
-@app.route('/team')
-def my_team():
+@app.route('/team/<team_id>')
+def my_team(team_id):
 	""" si l'id de la team est donnee, on montre cette team, avec un acces en edition si c'est
 	la team de user. Sinon, affiche la team de user avec edtiion """
-	user_id = session.get('user', None)
-	with Cursor() as cursor:
+	if not (team := Team.query.get(team_id)):
+		return redirect('/home')
 
-		team_id = -1
-		try:
-			team_id, is_my_team = get_team_id(cursor, user_id, request.args)
-			team = TeamModelFromId(cursor, team_id)
-		except NoTeamError:
-			# permet de choisir une team si user n'en a pas
-			return redirect('/home/team/list' if team_id == -1 else '/home')
+	user = User.query.get(session.get('user', None))
+	user.is_admin = is_admin()
+	is_my_team = user and user.team == team
 
-		msg = request.args.get('msg', None)
-		teammates = UsersFromTeam(cursor, team_id)
-		objs = ObjectivesModel(cursor).to_sorted_list()
-		pictures = PicturesOfTeamModel(cursor, team.team_id)
-		all_qrs = AllQRCodesModel(cursor)
-		team_qrs = QRCodesOfTeam(cursor, team_id)
-
-	return render_template('team_page.html', edit=is_my_team, team=team,\
-		teammates=teammates.users, objectives=objs, pictures=pictures.pictures, \
-		qrs=all_qrs, team_qrs=team_qrs, user_id=user_id, msg=msg)
-
-def get_team_id(cursor, user_id, args):
-	""" essaye de trouver l'id de la team """
-	try:
-		team_of_user = TeamOf(cursor, user_id)
-		team_id_of_user = team_of_user.team_id
-	except NoTeamError:
-		team_id_of_user = -1
-	if 'team' in args:
-		return int(args['team']), team_id_of_user == int(args['team'])
-	return TeamOf(cursor, user_id).team_id, True
+	return render_template(
+		'team_page.html',
+		edit=is_my_team,
+		team=(team_dict := TeamFullSchema().dump(team)),
+		msg=request.args.get('msg', None),
+		objectives=Objective.query.all(),
+		qrs=QRCode.query.all(),
+		user=user,
+		pictures={pic['objective']: pic for pic in team_dict['pictures']}
+	)
 
 @app.route('/team/leave')
 def team_leave():
 	""" un utilisateur qui quitte son equipe """
-	user_id = getter_user(session)
-	with Cursor() as cursor:
-		success = TeamLeave(user_id).send_db(cursor)
-	msg = 'is owner'
-	return redirect('/home') if success else redirect('/team?msg={}'.format(msg))
+	user = User.query.get(getter_user(session))
+	team = user.team
+	if team.owner == user and len(team.users) > 1:
+		return redirect('/team?msg=is-owner')
 
-@app.route('/team/picture')
-def picture():
-	obj_id = int(request.args['obj_id'])
-	team_id = int(request.args['team'])
-	with Cursor() as cursor:
-		pic = PictureOfTeam(cursor, team_id, obj_id)
-		if pic.is_uploaded(cursor):
-			return send_file(join('uploads', pic.filename))
+	team.users.remove(user)
+	if not team.users:
+		db.session.delete(team)
+	db.session.commit()
 
-@app.route('/team/picture/add', methods=['POST'])
+	return redirect('/home')
+
+@app.route('/team/picture', methods=['POST'])
 def add_picture():
 	if 'file' in request.files:
 		file = request.files['file']
 		if file.filename:
-			with Cursor() as cursor:
-				user_id = getter_user(session)
-				team_id = TeamOf(cursor, user_id).team_id
-				obj_id = request.form['obj_id']
-				pic = PictureVue(team_id, obj_id, file).send_db(cursor)
-	return redirect('/team')
+			team = User.query.get(getter_user(session)).team
+			db.session.add(Picture(
+				team=team,
+				objective_id=int(request.form['id']),
+				filename=save_file(file),
+				status=0
+			))
+			db.session.commit()
+	return redirect(f'/team/{team.id}')
 
 @app.route('/team/picture/delete')
 def delete_picture():
 	""" supprime l'image si user est l'owner de son equipe """
-	user_id = getter_user(session)
-	obj_id = int(request.args['obj_id'])
-	with Cursor() as cursor:
-		team = TeamOf(cursor, user_id)
-		if team.is_owned_by(user_id):
-			DeletePictureVue(team.team_id, obj_id).send_db(cursor)
-	return redirect('/team')
+	user = User.query.get(getter_user(session))
+	pic = Picture.query.get((user.team.id, request.args['obj']))
+
+	if pic.team.owner == user:
+		db.session.delete(pic)
+		db.session.commit()
+	return redirect(f'/team/{user.team.id}')
 
 @app.route('/team/owner')
 def change_owner():
 	""" change l'owner de lequipe """
-	user_id = getter_user(session)
-	new_owner = int(request.args['user'])
-	with Cursor() as cursor:
-		team = TeamOf(cursor, user_id)
-		if team.is_owned_by(user_id):
-			ChangeOwner(team.team_id, new_owner).send_db(cursor)
-	return redirect('/team')
+	user = User.query.get(getter_user(session))
+	new_owner = User.query.get(request.args['user'])
+	if user.team.owner == user:
+		user.team.owner = new_owner
+		db.session.commit()
+	return redirect(f'/team/{user.team.id}')
 
 # ================================ OBJECTIVES =================================
 
-@app.route('/objectives/new')
-def new_obj():
-	points = request.args['points']
-	descr = request.args['descr']
-	with Cursor() as cursor:
-		ObjectiveVue(points, descr).send_db(cursor)
-	return redirect('/admin')
-
-@app.route('/objectives/delete')
-def delete_obj():
-	obj_id = request.args['obj_id']
-	with Cursor() as cursor:
-		DeleteObjectiveVue(obj_id).send_db(cursor)
-	return redirect('/admin')
-
 @app.route('/picture/<pic_id>')
 def send_picture(pic_id):
+	""" sert l'image demandee """
 	return send_file(join('uploads', pic_id))
 
 @app.route('/picture')
 def random_picture():
-	with Cursor() as cursor:
-		pics = AllPicturesModel(cursor)
-		pic = pics.random_picture()
-		if pic:
-			obj = ObjectiveModelFromId(cursor, pic.objective_id)
-			team = TeamModelFromId(cursor, pic.team_id)
-			return render_template('random_picture.html', team=team, pic=pic, obj=obj)
-		return render_template('random_picture.html', pic=False)
+	""" sert la page d'imag aleatoire """
+	from random import choice
+	if (pic := choice(Picture.query.all())):
+		team = TeamFullSchema().dump(pic.team)
+		return render_template('random_picture.html', pic=pic, team=team)
+	return render_template('random_picture.html', pic=False)
 
 @app.route('/qrcodes/<qr_key>')
 def found_qrcode(qr_key):
 	""" page quand quelqu'un trouve un qrcode """
-	with Cursor() as cursor:
-		user_id = getter_user(session)
-		team = TeamOf(cursor, user_id)
-		try:
-			qrcode = QRCodeFromKey(cursor, qr_key)
-			already = not FoundQRCodeVue(team.team_id, qrcode.qr_id).send_db(cursor)
-			return render_template('find_qr.html', team=team, exists=True, already=already, qrcode=qrcode)
-		except QRDoesntExistError:
-			return render_template('find_qr.html', team=team, exists=False)
+	team = TeamSchema().dump(User.query.get(getter_user(session)).team)
+	found = FoundQR.query.get((team['id'], qr_key))
+	qrcode = QRCode.query.get(qr_key)
+
+	if not qrcode:
+		return render_template('find_qr.html', team=team, exists=False)
+	if not found:
+		db.session.add(FoundQR(team_id=team['id'], qr_id=qr_key))
+		db.session.commit()
+	return render_template('find_qr.html', team=team, exists=True, already=found, qrcode=qrcode)
 
 # =================================== ADMIN ===================================
 
@@ -254,62 +204,83 @@ def found_qrcode(qr_key):
 def admin():
 	""" sert la page d'administration """
 	session['admin'] = 1
-	with Cursor() as cursor:
-		objs = ObjectivesModel(cursor)
-		teams = TeamsModel(cursor)
-		users = AllUsers(cursor)
-		invalid_pictures = PicturesWithStatus(cursor, 0)
-		qrcodes = AllQRCodesModel(cursor)
-	return render_template('admin.html', objectives=objs, teams=teams,\
-		users=users, pictures=invalid_pictures.pictures, qrcodes=qrcodes.qrcodes)
+	teams = Team.query.all()
+	invalid_pictures = {
+		team: pics for team in teams
+		if (pics := list(filter(lambda pic: pic.status == 0, team.pictures)))
+	}
+	return render_template(
+		'admin.html',
+		teams=load_medals(TeamSchema(many=True).dump(teams)),
+		users=User.query.all(),
+		pictures=invalid_pictures,
+		objectives=Objective.query.all(),
+		qrcodes=QRCode.query.all()
+	)
 
 @app.route('/admin/user/delete')
 @basic_auth.required
 def delete_user():
 	""" supprime l'utilisateur specifie """
-	user_id = request.args['user']
-	with Cursor() as cursor:
-		TeamLeave(user_id).send_db(cursor)
-		status = RemoveUser(user_id).send_db(cursor)
-	return jsonify(status=status)
+	user = User.query.get(request.args['user'])
+	if (team := user.team):
+		team.users.remove(user)
+		if len(team.users) == 0:
+			db.session.delete(team)
+		elif team.owner == user:
+			team.owner = User.query.filter_by(team_id=team.id).first()
+	db.session.delete(user)
+	db.session.commit()
+	return redirect('/admin')
+
+@app.route('/admin/objectives/new')
+def new_obj():
+	""" creer un nouvel objectif """
+	db.session.add(Objective(
+		points=request.args['points'],
+		description=request.args['descr'])
+	)
+	db.session.commit()
+	return redirect('/admin')
+
+@app.route('/admin/objectives/delete')
+def delete_obj():
+	""" supprime un objectif """
+	db.session.delete(Objective.query.get(request.args['obj']))
+	db.session.commit()
+	return redirect('/admin')
 
 @app.route('/admin/picture/delete')
 @basic_auth.required
 def admin_delete_picture():
 	""" suppression d'une photo en tant qu'admin """
-	team_id = request.args['team']
-	obj_id = request.args['obj']
-	with Cursor() as cursor:
-		DeletePictureVue(team_id, obj_id).send_db(cursor)
-		return redirect('/admin')
+	db.session.delete(Picture.query.get((request.args['team'], request.args['obj'])))
+	db.session.commit()
+	return redirect('/admin')
 
 @app.route('/admin/picture/accept')
 @basic_auth.required
 def admin_accept_picture():
 	""" changement du status d'une photo """
-	team_id = request.args['team']
-	obj_id = request.args['obj']
-	with Cursor() as cursor:
-		AcceptPictureVue(team_id, obj_id).send_db(cursor)
+	Picture.query.get((request.args['team'], request.args['obj'])).status = 1
+	db.session.commit()
 	return redirect('/admin')
 
 @app.route('/admin/qrcodes/new')
 @basic_auth.required
 def add_qrcode():
 	""" ajoute un nouveau qr code """
-	points = request.args['points']
-	descr = request.args['descr']
-	with Cursor() as cursor:
-		QRCodeVue(points, descr).send_db(cursor)
+	qrcode = QRCode(points=request.args['points'], description=request.args['descr'])
+	db.session.add(qrcode)
+	db.session.commit()
 	return redirect('/admin')
 
 @app.route('/admin/qrcodes/delete')
 @basic_auth.required
 def delete_qrcode():
 	""" supprime le qrcode """
-	qr_id = request.args['qr']
-	with Cursor() as cursor:
-		RemoveQRCode(qr_id).send_db(cursor)
+	db.session.delete(QRCode.query.get(request.args['qr']))
+	db.session.commit()
 	return redirect('/admin')
 
 @app.route('/admin/qrcodes/<qr_key>')
@@ -325,11 +296,6 @@ def handle_no_user_error(_):
 	""" redirige le client vers la creation d'user si user nest pas defini """
 	return redirect('/home')
 
-@app.errorhandler(NoTeamError)
-def handle_no_team_error(_):
-	""" redirige le client vers la selection d'equipe si une erreur survient """
-	return redirect('/home/team/list')
-
 # =================================== UTILS ===================================
 
 def getter_user(session):
@@ -338,11 +304,14 @@ def getter_user(session):
 		raise NoUserError()
 	return session['user']
 
+def is_admin():
+	return session.get('admin', 0) == 1
+
 @app.route('/test')
 def test_qr():
 	return render_template('test_qr.html')
 
-init.main()
+import init
+init.main(app, db)
 if __name__ == '__main__':
-	db.init_app(app)
 	app.run('0.0.0.0')
