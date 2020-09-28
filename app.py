@@ -28,15 +28,11 @@ def index():
 @app.route('/home')
 def home():
 	""" page principale """
-	try:
-		user = User.query.get(getter_user(session))
-	except NoUserError:
-		user = None
 	return render_template(
 		'home_page.html',
 		teams=load_medals(TeamSchema(many=True).dump(Team.query.all())),
 		users=User.query.order_by('name').all(),
-		me=user,
+		me=User.query.get(session.get('user', None)),
 		admin=is_admin(),
 		msg=request.args.get('msg', None)
 	)
