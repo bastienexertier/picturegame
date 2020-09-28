@@ -102,12 +102,12 @@ def my_team(team_id):
 		return redirect('/home')
 
 	user = User.query.get(session.get('user', None))
-	user.is_admin = is_admin()
 	is_my_team = user and user.team == team
 
 	return render_template(
 		'team_page.html',
 		edit=is_my_team,
+		is_admin=is_admin(),
 		team=(team_dict := TeamFullSchema().dump(team)),
 		msg=request.args.get('msg', None),
 		objectives=Objective.query.all(),

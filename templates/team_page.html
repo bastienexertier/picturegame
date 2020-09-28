@@ -130,7 +130,7 @@
 					<h3>&#x1F5BC; {{ obj.description }}</h3>
 					<hr>
 					{% if obj.id in pictures %}
-						{% if edit or pictures[obj.id].status == 1 or user.is_admin %}
+						{% if edit or pictures[obj.id].status == 1 or is_admin %}
 							<img class="obj-img" src="/picture/{{ pictures[obj.id].filename }}">
 						{% else %}
 							<h1 class="text-center">&#x1F622;</h1>
