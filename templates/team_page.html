@@ -169,7 +169,9 @@
 						<div class="obj-row">
 							<h5 class="obj-points">&#x1F3C6;{{ obj.points }}</h5>
 							{% if obj.id in pictures %}
-								<h5 class="obj-points new-comment" onclick="send_comment('{{ pic.id }}')">&#x1F4AC;</h5>
+								{% if pic.status == 1 %}
+									<h5 class="obj-points new-comment" onclick="send_comment('{{ pic.id }}')">&#x1F4AC;</h5>
+								{% endif %}
 								{% if edit %}
 								<h5 class="obj-points">
 									{% if user.id == team.owner.id %}
