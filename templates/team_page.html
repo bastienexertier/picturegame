@@ -129,61 +129,62 @@
 
 			{% for obj in objectives %}
 				{% set pic = pictures[obj.id] %}	
-			<div class="col-12 col-md-6 col-xl-4 element-container">
-				<div class="element">
-					<h3>&#x1F5BC; {{ obj.description }}</h3>
-					<hr>
-					{% if obj.id in pictures %}
-						{% if edit or pic.status == 1 or is_admin %}
-							<img class="obj-img" src="/picture/{{ pic.filename }}">
+				<div class="col-12 col-md-6 col-xl-4 element-container">
+					<div class="element">
+						<h3>&#x1F5BC; {{ obj.description }}</h3>
+						<hr>
+						{% if obj.id in pictures %}
+							{% if edit or pic.status == 1 or is_admin %}
+								<img class="obj-img" src="/picture/{{ pic.filename }}">
 
 
-							<hr>
-							<div class="comments">
-								{% for comment in pic.comments %}
-									<div class="box-list comment">
-										<span>{{ comment.user.name }} : <span>{{ comment.text }}</span></span>
+									
+									<div style="{{ 'display: none;' if not pic.comments }}">
+										<hr>
+										<div id="comments-{{ pic.id }}" class="comments">
+											{% for comment in pic.comments %}
+												<div class="box-list comment">
+													<span>{{ comment.user.name }} : <span>{{ comment.text }}</span></span>
+												</div>
+											{% endfor %}
+										</div>
 									</div>
-								{% endfor %}
-								<div class="box-list comment text-center">
-									<span class="new-comment" onclick="send_comment('{{ pic.id }}')">Comment</span>
-								</div>
-							</div>
 
 
+							{% else %}
+								<h1 class="text-center">&#x1F622;</h1>
+							{% endif %}
+						{% elif edit %}
+						<form action="/team/picture" method=post enctype=multipart/form-data class="text-center">
+							<input type="hidden" name="id" value="{{ obj.id }}">
+							<input id="file-{{ obj.id }}" type="file" name="file" accept="image/*" onchange="this.form.submit()" hidden>
+							<label for="file-{{ obj.id }}">
+								<h1>&#x1F4F8;</h1>
+							</label>
+						</form>
 						{% else %}
 							<h1 class="text-center">&#x1F622;</h1>
 						{% endif %}
-					{% elif edit %}
-					<form action="/team/picture" method=post enctype=multipart/form-data class="text-center">
-						<input type="hidden" name="id" value="{{ obj.id }}">
-						<input id="file-{{ obj.id }}" type="file" name="file" accept="image/*" onchange="this.form.submit()" hidden>
-						<label for="file-{{ obj.id }}">
-							<h1>&#x1F4F8;</h1>
-						</label>
-					</form>
-					{% else %}
-						<h1 class="text-center">&#x1F622;</h1>
-					{% endif %}
-					<hr>
-					<div class="obj-row">
-						<h5 class="obj-points">&#x1F3C6;{{ obj.points }}</h5>
-						{% if obj.id in pictures and edit %}
-							<h5 class="obj-points">
-								{% if user.id == team['owner']['id'] %}
-								<a href="/team/picture/delete?pic={{ pic.id }}" onclick="return delete_picture()">
-									&#x274C;
-								</a>
-								{% else %}
-								<a style="cursor: pointer;" onclick="return not_the_owner()">
-									&#x274C;
-								</a>
-								{% endif %}
-							</h5>
-						{% endif %}
+						<hr>
+						<div class="obj-row">
+							<h5 class="obj-points">&#x1F3C6;{{ obj.points }}</h5>
+							{% if obj.id in pictures and edit %}
+								<h5 class="obj-points new-comment" onclick="send_comment('{{ pic.id }}')">&#x1F4AC;</h5>
+								<h5 class="obj-points">
+									{% if user.id == team.owner.id %}
+									<a href="/team/picture/delete?pic={{ pic.id }}" onclick="return delete_picture()">
+										&#x274C;
+									</a>
+									{% else %}
+									<a style="cursor: pointer;" onclick="return not_the_owner()">
+										&#x274C;
+									</a>
+									{% endif %}
+								</h5>
+							{% endif %}
+						</div>
 					</div>
 				</div>
-			</div>
 			{% endfor %}
 
 			{% include 'footnote.html' %}
@@ -205,7 +206,15 @@
 		}
 		function send_comment(pic_id){
 				let text = prompt();
-				HTTP.post('/comment', {pic: pic_id, text: text}).then(Location.reload);
+				HTTP.post('/comment', {pic: pic_id, text: text}).then(() => append_comment(pic_id, '{{ user.name }}', text));
+		}
+		function append_comment(pic_id, username, text) {
+			let parent = document.getElementById(`comments-${pic_id}`);
+			let div = document.createElement('div');
+			div.classList = 'box-list comment';
+			div.innerHTML = `<span>${ username } : <span>${ text }</span></span>`;
+			parent.appendChild(div);
+			parent.parentElement.style.display = 'block';
 		}
 	</script>
 </body>

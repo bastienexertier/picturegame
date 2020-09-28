@@ -197,7 +197,6 @@ def found_qrcode(qr_key):
 @app.route('/comment', methods=['POST'])
 def post_comment():
 	""" post un commentaire """
-	print(request.json)
 	if (user_id := session.get('user', False)):
 		pic = Picture.query.get(request.json['pic'])
 		comment = Comment(text=request.json['text'], user_id=user_id)
