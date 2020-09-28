@@ -1,9 +1,9 @@
 """ model.user """
 
-from model import db, ma
+from sqlalchemy import event
+
+from model import db
 from colors import get_color
-from model.qrcode import FoundQRSchema
-from model.objective import PictureSchema
 
 # pylint: disable=no-member
 
@@ -40,44 +40,17 @@ class Team(db.Model):
 	def __repr__(self):
 		return f'<Team {self.name}, owner {self.owner.name}, color {self.color}>'
 
-# =================================== SCHEMA ===================================
-
-class UserSchema(ma.Schema):
-	""" un schema user """
-	class Meta:
-		model = User
-		fields = ('id', 'name')
-
-class TeamSchema(ma.Schema):
-	""" team schema """
-	class Meta:
-		model = Team
-		fields = ('id', 'owner', 'name', 'colors', 'score')
-	colors = ma.Function(lambda team: get_color(team.color))
-	owner = ma.Nested(UserSchema)
-	score = ma.Method('compute_score')
-
-	def compute_score(self, team):
+	def compute_score(self):
 		"""" retourne le score de l'equipe """
 		return (
-			sum(map(lambda pic: pic.objective.points, team.pictures)) +
-			sum(map(lambda found: found.qr.points, team.qrs))
+			sum(map(lambda pic: pic.objective.points, self.pictures)) +
+			sum(map(lambda found: found.qr.points, self.qrs))
 		)
 
-	def dump(self, element):
-		res = super().dump(element)
-		if self.many:
-			res.sort(key=lambda t: -t['score'])
-		return res
-
-class TeamFullSchema(TeamSchema):
-	""" un schema de team avec les users """
-	class Meta:
-		model = Team
-		fields = ('id', 'owner', 'name', 'colors', 'score', 'users', 'qrs', 'pictures')
-	users = ma.Nested(UserSchema, many=True)
-	pictures = ma.Nested(PictureSchema, many=True)
-	qrs = ma.Pluck(FoundQRSchema, 'qr', many=True)
+@event.listens_for(Team, 'load')
+def add_colors(target, context):
+	"""  """
+	target.colors = get_color(target.color)
 
 def load_medals(teams):
 	""" modifie les medailles """

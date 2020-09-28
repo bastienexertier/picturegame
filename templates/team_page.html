@@ -14,7 +14,7 @@
 		.element {
 			background-color: {{ team.colors[0] }}80;
 		}
-		.box-list span {
+		.box-list > span {
 			background-color: {{ team.colors[0] }}C0;
 		}
 		.footnote {
@@ -132,6 +132,16 @@
 					{% if obj.id in pictures %}
 						{% if edit or pictures[obj.id].status == 1 or is_admin %}
 							<img class="obj-img" src="/picture/{{ pictures[obj.id].filename }}">
+
+							{% if pictures[obj.id].comments %}
+								<hr>
+								{% for comment in pictures[obj.id].comments %}
+									<div class="box-list comment">
+										<span>{{ comment.user.name }} : <span>{{ comment.text }}</span></span>
+									</div>
+								{% endfor %}
+							{% endif %}
+
 						{% else %}
 							<h1 class="text-center">&#x1F622;</h1>
 						{% endif %}

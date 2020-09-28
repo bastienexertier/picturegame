@@ -6,7 +6,7 @@ from flask_basicauth import BasicAuth
 
 import colors
 from model import db
-from model.user import User, Team, TeamSchema, TeamFullSchema, load_medals
+from model.user import User, Team, load_medals
 from model.objective import Objective, Picture, save_file
 from model.qrcode import QRCode, FoundQR
 
@@ -30,7 +30,7 @@ def home():
 	""" page principale """
 	return render_template(
 		'home_page.html',
-		teams=load_medals(TeamSchema(many=True).dump(Team.query.all())),
+		teams=Team.query.all(),
 		users=User.query.order_by('name').all(),
 		user=User.query.get(session.get('user', None)),
 		admin=is_admin(),
@@ -51,8 +51,7 @@ def new_user():
 
 @app.route('/home/team')
 def user_page():
-	return render_template('team_list.html',
-		teams=TeamSchema(many=True).dump(Team.query.all()))
+	return render_template('team_list.html', teams=Team.query.all())
 
 @app.route('/home/team/join')
 def team_join():
@@ -104,12 +103,12 @@ def my_team(team_id):
 		'team_page.html',
 		edit=is_my_team,
 		is_admin=is_admin(),
-		team=(team_dict := TeamFullSchema().dump(team)),
+		team=team,
 		msg=request.args.get('msg', None),
 		objectives=Objective.query.all(),
 		qrs=QRCode.query.all(),
 		user=user,
-		pictures={pic['objective']: pic for pic in team_dict['pictures']}
+		pictures={pic.objective.id: pic for pic in team.pictures}
 	)
 
 @app.route('/team/leave')
@@ -175,14 +174,13 @@ def random_picture():
 	""" sert la page d'imag aleatoire """
 	from random import choice
 	if (pic := choice(Picture.query.all())):
-		team = TeamFullSchema().dump(pic.team)
-		return render_template('random_picture.html', pic=pic, team=team)
+		return render_template('random_picture.html', pic=pic)
 	return render_template('random_picture.html', pic=False)
 
 @app.route('/qrcodes/<qr_key>')
 def found_qrcode(qr_key):
 	""" page quand quelqu'un trouve un qrcode """
-	team = TeamSchema().dump(User.query.get(getter_user(session)).team)
+	team = User.query.get(getter_user(session)).team
 	found = FoundQR.query.get((team['id'], qr_key))
 	qrcode = QRCode.query.get(qr_key)
 
@@ -207,7 +205,7 @@ def admin():
 	}
 	return render_template(
 		'admin.html',
-		teams=load_medals(TeamSchema(many=True).dump(teams)),
+		teams=teams,
 		users=User.query.all(),
 		pictures=invalid_pictures,
 		objectives=Objective.query.all(),

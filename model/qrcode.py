@@ -6,7 +6,7 @@ from subprocess import check_output
 from os import remove
 from os.path import join, isfile
 
-from model import db, ma
+from model import db
 from path import PATH, URL
 from sqlalchemy import event
 
@@ -33,19 +33,6 @@ class FoundQR(db.Model):
 
 	def __repr__(self):
 		return f'<FoundQR {self.team.name} found {self.qr}>'
-
-# =================================== SCHEMA ===================================
-
-class QRCodeSchema(ma.Schema):
-	class Meta:
-		model = QRCode
-		fields = ('id', 'points', 'description')
-
-class FoundQRSchema(ma.Schema):
-	class Meta:
-		model = FoundQR
-		fields = ('qr',)
-	qr = ma.Pluck(QRCodeSchema, 'id')
 
 # =========================== QRCODE EVENT LISTENERS ===========================
 

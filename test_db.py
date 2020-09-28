@@ -7,6 +7,7 @@ from model import db
 from model.user import User, Team
 from model.qrcode import QRCode, FoundQR
 from model.objective import Objective, Picture
+from model.comment import Comment
 
 db.init_app(app)
 app.app_context().push()
@@ -15,19 +16,25 @@ db.drop_all()
 db.session.commit()
 db.create_all()
 
-# A = User(name='A')
-# B = User(name='B')
-# totos = Team(name='totos', owner=A, color=1)
-# totos.users.append(A)
-# totos.users.append(B)
-# db.session.add(totos)
-# db.session.commit()
+A = User(name='A')
+B = User(name='B')
+totos = Team(name='totos', owner=A, color=1)
+totos.users.append(A)
+totos.users.append(B)
+db.session.add(totos)
+db.session.commit()
 
 obj1 = Objective(points=50, description='Le premier objectif')
 obj2 = Objective(points=50, description='Le deuxieme objectif')
-# pic = Picture(objective=obj1, filename='umhquypwri.jpg', status=1, team=totos)
+pic = Picture(objective=obj1, filename='umhquypwri.jpg', status=1, team=totos)
 
-# db.session.add(pic)
+pic.comments.append(Comment(text='Salut', user=A))
+pic.comments.append(Comment(text='Salut ça va?', user=B))
+pic.comments.append(Comment(text='Ça va et toi?', user=A))
+pic.comments.append(Comment(text='Bah écoute ça va', user=B))
+pic.comments.append(Comment(text='Cool :)', user=A))
+
+db.session.add(pic)
 db.session.add(obj1)
 db.session.add(obj2)
 db.session.commit()

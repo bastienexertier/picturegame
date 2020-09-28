@@ -4,7 +4,8 @@ from random import choice
 from string import ascii_lowercase
 from os.path import isfile, join
 
-from model import db, ma
+from model import db
+from model.comment import Comment
 
 # pylint: disable=no-member
 
@@ -17,29 +18,20 @@ class Objective(db.Model):
 		return f'<Objective "{self.description}" for {self.points} points>'
 
 class Picture(db.Model):
-	team_id = db.Column(db.Integer, db.ForeignKey('team.id'), primary_key=True)
-	objective_id = db.Column(db.Integer, db.ForeignKey('objective.id'), primary_key=True)
+	id = db.Column(db.Integer, primary_key=True)
+	team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
+	objective_id = db.Column(db.Integer, db.ForeignKey('objective.id'))
+
+	db.UniqueConstraint('team_id', 'objective_id')
 
 	filename = db.Column(db.String, nullable=False)
 	status = db.Column(db.Integer, nullable=False)
 
 	objective = db.relationship('Objective', backref=db.backref('teams', cascade='all, delete'))
+	comments = db.relationship('Comment', backref='picture', uselist=True)
 
 	def __repr__(self):
 		return f'<Picture for {self.objective} by {self.team.name}, status={self.status}>'
-
-# =================================== SCHEMA ===================================
-
-class ObjectiveSchema(ma.Schema):
-	class Meta:
-		model = Objective
-		fields = ('id', 'points', 'description')
-
-class PictureSchema(ma.Schema):
-	class Meta:
-		model = Picture
-		fields = ('objective', 'filename', 'status')
-	objective = ma.Pluck(ObjectiveSchema, 'id')
 
 # ==================================== UTILS ====================================
 
