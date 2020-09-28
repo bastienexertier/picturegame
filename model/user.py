@@ -12,7 +12,7 @@ class User(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(), nullable=False, unique=True)
 
-	team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
+	team_id = db.Column(db.Integer, db.ForeignKey('team.id', use_alter=True))
 	team = db.relationship(
 		'Team',
 		backref=db.backref('users', uselist=True),
@@ -20,6 +20,7 @@ class User(db.Model):
 		foreign_keys=team_id,
 		post_update=True
 	)
+	comments = db.relationship('Comment', backref='user', cascade='all, delete')
 
 	def __repr__(self):
 		return f'<User {self.name} in {self.team.name if self.team else None}>'

@@ -96,9 +96,9 @@
 							{% for pic in pics %}
 								<div>
 									<div class="obj-row">
-										<a href="/admin/picture/delete?team={{ team.id }}&obj={{ pic.objective.id }}">&#x274C;</a>
+										<a href="/admin/picture/delete?pic={{ pic.id }}">&#x274C;</a>
 										<h6>{{ pic.objective.description }}</h6>
-										<a href="/admin/picture/accept?team={{ team.id }}&obj={{ pic.objective.id }}">&#x2705;</a>
+										<a href="/admin/picture/accept?pic={{ pic.id }}">&#x2705;</a>
 									</div>
 									<img class="obj-img" src="/picture/{{ pic.filename }}">
 								</div>

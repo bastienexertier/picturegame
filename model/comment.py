@@ -10,8 +10,6 @@ class Comment(db.Model):
 
 	text = db.Column(db.String)
 
-	user = db.relationship('User')
-
 	def __repr__(self):
 		return f'<Comment on {self.picture} by {self.user.name} : {self.text}>'
 

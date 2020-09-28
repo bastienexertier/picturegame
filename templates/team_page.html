@@ -17,6 +17,9 @@
 		.box-list > span {
 			background-color: {{ team.colors[0] }}C0;
 		}
+		.comments {
+			background-color: {{ team.colors[0] }}A0;
+		}
 		.footnote {
 			color: {{ team.colors[0] }}20;
 		}
@@ -124,23 +127,29 @@
 				</div>
 			{% endif %}
 
-			{% for obj in objectives %}		
+			{% for obj in objectives %}
+				{% set pic = pictures[obj.id] %}	
 			<div class="col-12 col-md-6 col-xl-4 element-container">
 				<div class="element">
 					<h3>&#x1F5BC; {{ obj.description }}</h3>
 					<hr>
 					{% if obj.id in pictures %}
-						{% if edit or pictures[obj.id].status == 1 or is_admin %}
-							<img class="obj-img" src="/picture/{{ pictures[obj.id].filename }}">
+						{% if edit or pic.status == 1 or is_admin %}
+							<img class="obj-img" src="/picture/{{ pic.filename }}">
 
-							{% if pictures[obj.id].comments %}
-								<hr>
-								{% for comment in pictures[obj.id].comments %}
+
+							<hr>
+							<div class="comments">
+								{% for comment in pic.comments %}
 									<div class="box-list comment">
 										<span>{{ comment.user.name }} : <span>{{ comment.text }}</span></span>
 									</div>
 								{% endfor %}
-							{% endif %}
+								<div class="box-list comment text-center">
+									<span class="new-comment" onclick="send_comment('{{ pic.id }}')">Comment</span>
+								</div>
+							</div>
+
 
 						{% else %}
 							<h1 class="text-center">&#x1F622;</h1>
@@ -162,7 +171,7 @@
 						{% if obj.id in pictures and edit %}
 							<h5 class="obj-points">
 								{% if user.id == team['owner']['id'] %}
-								<a href="/team/picture/delete?obj={{ obj.id }}" onclick="return delete_picture()">
+								<a href="/team/picture/delete?pic={{ pic.id }}" onclick="return delete_picture()">
 									&#x274C;
 								</a>
 								{% else %}
@@ -193,6 +202,10 @@
 		}
 		function change_owner(username) {
 			return confirm(`Make ${username} the leader of the team?`)
+		}
+		function send_comment(pic_id){
+				let text = prompt();
+				HTTP.post('/comment', {pic: pic_id, text: text}).then(Location.reload);
 		}
 	</script>
 </body>

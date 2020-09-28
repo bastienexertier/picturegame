@@ -1,7 +1,7 @@
 """ fichier controlleur de l'appli """
 
 from os.path import join
-from flask import Flask, render_template, request, redirect, session, send_file
+from flask import Flask, render_template, request, redirect, session, send_file, Response
 from flask_basicauth import BasicAuth
 
 import colors
@@ -9,6 +9,7 @@ from model import db
 from model.user import User, Team, load_medals
 from model.objective import Objective, Picture, save_file
 from model.qrcode import QRCode, FoundQR
+from model.comment import Comment
 
 app = Flask(__name__)
 app.secret_key = 'turbo prout prout'
@@ -145,7 +146,7 @@ def add_picture():
 def delete_picture():
 	""" supprime l'image si user est l'owner de son equipe """
 	user = User.query.get(getter_user(session))
-	pic = Picture.query.get((user.team.id, request.args['obj']))
+	pic = Picture.query.get(request.args['pic'])
 
 	if pic.team.owner == user:
 		db.session.delete(pic)
@@ -190,6 +191,20 @@ def found_qrcode(qr_key):
 		db.session.add(FoundQR(team_id=team['id'], qr_id=qr_key))
 		db.session.commit()
 	return render_template('find_qr.html', team=team, exists=True, already=found, qrcode=qrcode)
+
+# ================================== COMMENT ==================================
+
+@app.route('/comment', methods=['POST'])
+def post_comment():
+	""" post un commentaire """
+	print(request.json)
+	if (user_id := session.get('user', False)):
+		pic = Picture.query.get(request.json['pic'])
+		comment = Comment(text=request.json['text'], user_id=user_id)
+		pic.comments.append(comment)
+		db.session.commit()
+		return Response(status=201)
+	return Response(status=403)
 
 # =================================== ADMIN ===================================
 
@@ -248,7 +263,7 @@ def delete_obj():
 @basic_auth.required
 def admin_delete_picture():
 	""" suppression d'une photo en tant qu'admin """
-	db.session.delete(Picture.query.get((request.args['team'], request.args['obj'])))
+	db.session.delete(Picture.query.get(request.args['pic']))
 	db.session.commit()
 	return redirect('/admin')
 
@@ -256,7 +271,7 @@ def admin_delete_picture():
 @basic_auth.required
 def admin_accept_picture():
 	""" changement du status d'une photo """
-	Picture.query.get((request.args['team'], request.args['obj'])).status = 1
+	Picture.query.get(request.args['pic']).status = 1
 	db.session.commit()
 	return redirect('/admin')
 
