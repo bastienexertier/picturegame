@@ -209,9 +209,14 @@
 			return confirm(`Make ${username} the leader of the team?`)
 		}
 		function send_comment(pic_id){
+				if (!'{{ user.name }}') return alert('You don\'t have a username. Go back to the home page to set one!');
 				let text = prompt();
 				if (!text) return;
-				HTTP.post('/comment', {pic: pic_id, text: text}).then(() => append_comment(pic_id, '{{ user.name }}', text));
+				HTTP.post('/comment', {pic: pic_id, text: text}).then(response => {
+					if (response.ok) {
+						append_comment(pic_id, '{{ user.name }}', text);
+					}
+				});
 		}
 		function append_comment(pic_id, username, text) {
 			let parent = document.getElementById(`comments-${pic_id}`);
