@@ -113,7 +113,7 @@
 					<hr>
 					<div class="row">
 						{% for user in users %}
-							{% set emoji_id = user.nauser.__hash__()%5 %}
+							{% set emoji_id = user.name.__hash__()%5 %}
 							<h5 class="col-2">
 								{% if emoji_id == 0 %}
 									&#x1F9D1;
