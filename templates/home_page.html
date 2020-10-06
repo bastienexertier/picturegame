@@ -2,6 +2,7 @@
 <html>
 <head>
 	{% include 'headers.html' %}
+	{% set medals = {1: '🥇', 2: '🥈', 3: '🥉'} %}
 	<title>Home</title>
 </head>
 <body>
@@ -88,10 +89,7 @@
 					<div class="row">
 						{% for team in teams %}
 							<h5 class="col-2 line-left">
-								{% if team.medal == 1 %}&#x1F947;
-								{% elif team.medal == 2 %}&#x1F948;
-								{% elif team.medal == 3 %}&#x1F949;
-								{% else %}&#x1F44D;{% endif %}
+								{{ medals.get(team.medal, '👍')}}
 							</h5>
 							<h5 class="col-6 line-middle ellipseable">
 								<a href="/team/{{ team.id }}">
