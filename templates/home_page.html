@@ -3,6 +3,7 @@
 <head>
 	{% include 'headers.html' %}
 	{% set medals = {1: '🥇', 2: '🥈', 3: '🥉'} %}
+	{% set emojis = {0: '🦸', 1: '🤵', 2: '👱', 3: '🧑', 4: '🙆'} %}
 	<title>Home</title>
 </head>
 <body>
@@ -111,19 +112,8 @@
 					<hr>
 					<div class="row">
 						{% for user in users %}
-							{% set emoji_id = user.name.__hash__()%5 %}
 							<h5 class="col-2">
-								{% if emoji_id == 0 %}
-									&#x1F9D1;
-								{% elif emoji_id == 1 %}
-									&#x1F471;
-								{% elif emoji_id == 2 %}
-									&#x1F646;
-								{% elif emoji_id == 3 %}
-									&#x1F935;
-								{% elif emoji_id == 4 %}
-									&#x1F9B8;
-								{% endif %}
+								{{ emojis[user.name.__hash__()%emojis.__len__()] }}
 							</h5>
 							<h5 class="col-9 line-middle ellipseable">{{ user.name }}</h5>
 						{% endfor %}
