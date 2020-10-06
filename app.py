@@ -31,7 +31,7 @@ def home():
 	""" page principale """
 	return render_template(
 		'home_page.html',
-		teams=Team.query.all(),
+		teams=load_medals(Team.query.all()),
 		users=User.query.order_by('name').all(),
 		user=User.query.get(session.get('user', None)),
 		admin=is_admin(),

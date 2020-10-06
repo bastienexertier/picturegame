@@ -41,12 +41,12 @@ class Team(db.Model):
 	def __repr__(self):
 		return f'<Team {self.name}, owner {self.owner.name}, color {self.color}>'
 
-	def compute_score(self):
-		"""" retourne le score de l'equipe """
-		return (
-			sum(map(lambda pic: pic.objective.points, self.pictures)) +
-			sum(map(lambda found: found.qr.points, self.qrs))
-		)
+@event.listens_for(Team, 'load')
+def compute_score(target, context):
+	"""" retourne le score de l'equipe """
+	picture_score = sum(map(lambda pic: pic.objective.points, target.pictures))
+	qr_score = sum(map(lambda found: found.qr.points, target.qrs))
+	target.score = picture_score + qr_score
 
 @event.listens_for(Team, 'load')
 def add_colors(target, context):
@@ -55,18 +55,18 @@ def add_colors(target, context):
 
 def load_medals(teams):
 	""" modifie les medailles """
-	res = sorted(teams, key=lambda team: -team['score'])
+	res = sorted(teams, key=lambda team: -team.score)
 	scores = {}
 	for team in res:
-		if team['score'] not in scores:
-			scores[team['score']] = []
-		scores[team['score']].append(team)
+		if team.score not in scores:
+			scores[team.score] = []
+		scores[team.score].append(team)
 	current_medal = 1
 	for score in reversed(sorted(scores.keys())):
 		current_medal += len(scores[score]) - 1
 		if current_medal > 3:
 			break
 		for team in scores[score]:
-			team['medal'] = current_medal
+			team.medal = current_medal
 		current_medal += 1
 	return teams
