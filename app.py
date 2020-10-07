@@ -41,7 +41,7 @@ def home():
 @app.route('/user', methods=['POST'])
 def new_user():
 	""" reception des donnees pour la creation d'un user """
-	if 'name' in request.form:
+	if 'name' in request.form and request.form['name']:
 		user = User(name=request.form['name'].strip().capitalize())
 		db.session.add(user)
 		db.session.commit()
@@ -49,10 +49,6 @@ def new_user():
 	return redirect('/home')
 
 # ================================= JOIN TEAM =================================
-
-@app.route('/home/team')
-def user_page():
-	return render_template('team_list.html', teams=Team.query.all())
 
 @app.route('/home/team/join')
 def team_join():
@@ -158,7 +154,7 @@ def change_owner():
 	""" change l'owner de lequipe """
 	user = User.query.get(getter_user(session))
 	new_owner = User.query.get(request.args['user'])
-	if user.team.owner == user:
+	if user.team and user.team.owner == user:
 		user.team.owner = new_owner
 		db.session.commit()
 	return redirect(f'/team/{user.team.id}')
